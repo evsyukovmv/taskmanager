@@ -1,7 +1,6 @@
 package columns
 
 import (
-	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/models"
 	"github.com/evsyukovmv/taskmanager/postgres"
 	"github.com/go-chi/chi"
@@ -10,37 +9,26 @@ import (
 	"strconv"
 )
 
-func selectColumn(r *http.Request) (*models.Column, error) {
+func findColumn(r *http.Request) (*models.Column, error) {
 	var column models.Column
 
 	projectId, err := strconv.Atoi(chi.URLParam(r, "projectId"))
+	if err != nil {
+		return &column, err
+	}
 	id, err := strconv.Atoi(chi.URLParam(r, "columnId"))
 	if err != nil {
 		return &column, err
 	}
 
-	column.Id = id
-	column.ProjectId = projectId
-	err = postgres.DB().Model(&column).Where("project_id = ?", projectId).Select()
+	err = postgres.DB().Model(&column).Where("project_id = ? AND id = ?", projectId, id).Select()
 	if err != nil {
 		return &column, err
 	}
 	return &column, err
 }
 
-func decodeValidateColumn(r *http.Request, project *models.Project) error {
-	id := project.Id
-	err := json.NewDecoder(r.Body).Decode(project)
-	if err != nil {
-		return err
-	}
-	project.Id = id
-
+func validate(column *models.Column) error {
 	validate := validator.New()
-	err = validate.Struct(project)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return validate.Struct(column)
 }

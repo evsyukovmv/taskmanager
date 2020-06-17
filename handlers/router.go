@@ -38,6 +38,7 @@ func columnsRouter() http.Handler {
 	r.Post("/", columns.Create)
 	r.Get("/{columnId}", columns.GetById)
 	r.Put("/{columnId}", columns.Update)
+	r.Put("/{columnId}/move", columns.Move)
 	r.Delete("/{columnId}", columns.Delete)
 
 	r.Mount("/{columnId}/tasks", tasksRouter())
@@ -50,6 +51,7 @@ func tasksRouter() http.Handler {
 	r.Post("/", tasks.Create)
 	r.Get("/{taskId}", tasks.GetById)
 	r.Put("/{taskId}", tasks.Update)
+	r.Put("/{columnId}/move", tasks.Move)
 	r.Delete("/{taskId}", tasks.Delete)
 
 	r.Mount("/{taskId}/comments", commentsRouter())

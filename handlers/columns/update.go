@@ -1,4 +1,4 @@
-package projects
+package columns
 
 import (
 	"encoding/json"
@@ -8,30 +8,29 @@ import (
 )
 
 func Update(w http.ResponseWriter, r *http.Request) {
-	project, err := findProject(r)
+	column, err := findColumn(r)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&project.ProjectBase)
+	err = json.NewDecoder(r.Body).Decode(&column.ColumnBase)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = validate(project)
+	err = validate(column)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = postgres.DB().Update(project)
+	err = postgres.DB().Update(column)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	helpers.WriteJSON(w, project)
+	helpers.WriteJSON(w, column)
 }
-

@@ -1,7 +1,6 @@
 package projects
 
 import (
-	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/models"
 	"github.com/evsyukovmv/taskmanager/postgres"
 	"github.com/go-chi/chi"
@@ -10,7 +9,7 @@ import (
 	"strconv"
 )
 
-func selectProject(r *http.Request) (*models.Project, error) {
+func findProject(r *http.Request) (*models.Project, error) {
 	var project models.Project
 
 	id, err := strconv.Atoi(chi.URLParam(r, "projectId"))
@@ -26,19 +25,7 @@ func selectProject(r *http.Request) (*models.Project, error) {
 	return &project, err
 }
 
-func decodeValidateProject(r *http.Request, project *models.Project) error {
-	id := project.Id
-	err := json.NewDecoder(r.Body).Decode(project)
-	if err != nil {
-		return err
-	}
-	project.Id = id
-
+func validate(p *models.Project) error {
 	validate := validator.New()
-	err = validate.Struct(project)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return validate.Struct(p)
 }

@@ -6,7 +6,7 @@ import (
 )
 
 func GetById(w http.ResponseWriter, r *http.Request) {
-	column, err := selectColumn(r)
+	column, err := findColumn(r)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return

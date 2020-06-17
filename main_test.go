@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"github.com/evsyukovmv/taskmanager/handlers"
+	"github.com/evsyukovmv/taskmanager/models"
 	"github.com/evsyukovmv/taskmanager/postgres"
 	"io/ioutil"
 	"net/http"
@@ -84,13 +85,27 @@ func deleteRequest(t *testing.T, server *httptest.Server, path string) *http.Res
 	return resp
 }
 
+func putRequest(t *testing.T, server *httptest.Server, path string, data string) *http.Response {
+	client := &http.Client{}
+	req, err := http.NewRequest("PUT", server.URL+path, bytes.NewBuffer([]byte(data)))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return resp
+}
+
 func TestProjects(t *testing.T) {
 	server := setupServer()
 	defer server.Close()
 	defer clearDBTables()
 
-	aProjectRequest := `{ "name": "AProject", "description": "AProjectDescription" }`
-	bProjectRequest := `{ "name": "BProject", "description": "BProjectDescription" }`
+	aProjectRequest := `{ "id": 10, "name": "AProject", "description": "AProjectDescription" }`
+	bProjectRequest := `{ "id": 20, "name": "BProject", "description": "BProjectDescription" }`
 
 	aProjectResponse := `{"id":2,"name":"AProject","description":"AProjectDescription"}`
 	bProjectResponse := `{"id":1,"name":"BProject","description":"BProjectDescription"}`
@@ -114,8 +129,7 @@ func TestProjects(t *testing.T) {
 	resp = getRequest(t, server, "/projects")
 	compareResponse(t, resp, http.StatusOK, `[`+aProjectResponse+`]`)
 
-	aProjectColumnResponse := `{"id":2,"name":"Default","position":0,"project_id":2}`
-
+	aProjectColumnResponse := `{"id":2,"project_id":2,"name":"Default","position":0}`
 	// Column must be automatically created for project
 	resp = getRequest(t, server, "/projects/2/columns")
 	compareResponse(t, resp, http.StatusOK, `[`+aProjectColumnResponse+`]`)
@@ -125,6 +139,52 @@ func TestColumns(t *testing.T) {
 	server := setupServer()
 	defer server.Close()
 	defer clearDBTables()
+
+	project := &models.Project{ ProjectBase: models.ProjectBase{ Name: "Test"} }
+	err := postgres.DB().Insert(project)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	columnRequest := `{ "name": "TestColumn" }`
+
+	columnResponse := `{"id":2,"project_id":1,"name":"TestColumn","position":0}`
+	defaultResponse := `{"id":1,"project_id":1,"name":"Default","position":1}`
+
+	// Create column
+	resp := postRequest(t, server, "/projects/1/columns" , columnRequest)
+	compareResponse(t, resp, http.StatusOK, columnResponse)
+
+	// Get all columns sorted by priority
+	resp = getRequest(t, server, "/projects/1/columns")
+	compareResponse(t, resp, http.StatusOK, `[`+columnResponse+`,`+defaultResponse+`]`)
+
+	// Get column by id
+	resp = getRequest(t, server, "/projects/1/columns/2")
+	compareResponse(t, resp, http.StatusOK, columnResponse)
+
+	// Update column name
+	updateRequest := `{ "name": "RenamedColumn" }`
+	defaultResponse = `{"id":1,"project_id":1,"name":"RenamedColumn","position":1}`
+	resp = putRequest(t, server, "/projects/1/columns/1", updateRequest)
+	compareResponse(t, resp, http.StatusOK, defaultResponse)
+
+	// Move column position
+	moveRequest := `{ "position": 0 }`
+	columnResponse = `{"id":1,"project_id":1,"name":"RenamedColumn","position":0}`
+	resp = putRequest(t, server, "/projects/1/columns/1/move", moveRequest)
+	compareResponse(t, resp, http.StatusOK, columnResponse)
+
+	// Delete column and get all projects without deleted column
+	resp = deleteRequest(t, server, "/projects/1/columns/1")
+	compareResponse(t, resp, http.StatusOK, columnResponse)
+	resp = getRequest(t, server, "/projects/1/columns")
+	columnResponse = `{"id":2,"project_id":1,"name":"TestColumn","position":1}`
+	compareResponse(t, resp, http.StatusOK, `[`+columnResponse+`]`)
+
+	// Deleting last column is not allowed
+	resp = deleteRequest(t, server, "/projects/1/columns/2")
+	compareResponse(t, resp, http.StatusBadRequest, `{ error: "deleting last column is not allowed" }`)
 }
 
 func TestNotFound(t *testing.T) {

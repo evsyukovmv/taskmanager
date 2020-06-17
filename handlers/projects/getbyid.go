@@ -6,7 +6,7 @@ import (
 )
 
 func GetById(w http.ResponseWriter, r *http.Request) {
-	project, err := selectProject(r)
+	project, err := findProject(r)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return

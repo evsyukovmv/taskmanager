@@ -10,7 +10,8 @@ import (
 
 func GetList(w http.ResponseWriter, r *http.Request) {
 	var columns []models.Column
-	err := postgres.DB().Model(&columns).Where("project_id = ?", chi.URLParam(r, "projectId")).Order("position ASC").Select()
+	err := postgres.DB().Model(&columns).Where(
+		"project_id = ?", chi.URLParam(r, "projectId")).Order("position ASC").Select()
 	if err != nil {
 		helpers.WriteError(w, err)
 		return

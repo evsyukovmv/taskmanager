@@ -1,33 +1,41 @@
-package projects
+package columns
 
 import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
 	"github.com/evsyukovmv/taskmanager/models"
 	"github.com/evsyukovmv/taskmanager/postgres"
+	"github.com/go-chi/chi"
 	"net/http"
+	"strconv"
 )
 
 func Create(w http.ResponseWriter, r *http.Request) {
-	var project models.Project
-
-	err := json.NewDecoder(r.Body).Decode(&project.ProjectBase)
+	projectId, err := strconv.Atoi(chi.URLParam(r, "projectId"))
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = validate(&project)
+	column := &models.Column{ProjectId: projectId}
+
+	err = json.NewDecoder(r.Body).Decode(&column.ColumnBase)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = postgres.DB().Insert(&project)
+	err = validate(column)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	helpers.WriteJSON(w, &project)
+	err = postgres.DB().Insert(column)
+	if err != nil {
+		helpers.WriteError(w, err)
+		return
+	}
+
+	helpers.WriteJSON(w, column)
 }
