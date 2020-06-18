@@ -3,35 +3,43 @@ package projects
 import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
-	"github.com/evsyukovmv/taskmanager/postgres"
+	"github.com/evsyukovmv/taskmanager/services/projects"
+	"github.com/go-chi/chi"
 	"net/http"
+	"strconv"
 )
 
 func Update(w http.ResponseWriter, r *http.Request) {
-	project, err := findProject(r)
+	id, err := strconv.Atoi(chi.URLParam(r, "projectId"))
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&project.ProjectBase)
+	p, err := projects.Storage().GetByID(id)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = validate(project)
+	err = json.NewDecoder(r.Body).Decode(&p.ProjectBase)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = postgres.DB().Update(project)
+	err = validate(p)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	helpers.WriteJSON(w, project)
+	projects.Storage().Update(p)
+	if err != nil {
+		helpers.WriteError(w, err)
+		return
+	}
+
+	helpers.WriteJSON(w, p)
 }
 

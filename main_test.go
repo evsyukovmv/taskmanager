@@ -14,6 +14,7 @@ import (
 func setupServer() *httptest.Server {
 	configureLogger()
 	configurePostgres()
+	configureServices()
 	return httptest.NewServer(handlers.NewRouter())
 }
 
@@ -104,8 +105,8 @@ func TestProjects(t *testing.T) {
 	defer server.Close()
 	defer clearDBTables()
 
-	aProjectRequest := `{ "id": 10, "name": "AProject", "description": "AProjectDescription" }`
-	bProjectRequest := `{ "id": 20, "name": "BProject", "description": "BProjectDescription" }`
+	aProjectRequest := `{ "name": "AProject", "description": "AProjectDescription" }`
+	bProjectRequest := `{ "name": "BProject", "description": "BProjectDescription" }`
 
 	aProjectResponse := `{"id":2,"name":"AProject","description":"AProjectDescription"}`
 	bProjectResponse := `{"id":1,"name":"BProject","description":"BProjectDescription"}`
@@ -122,6 +123,12 @@ func TestProjects(t *testing.T) {
 	postRequest(t, server, "/projects", aProjectRequest)
 	resp = getRequest(t, server, "/projects")
 	compareResponse(t, resp, http.StatusOK, `[`+aProjectResponse+`,`+bProjectResponse+`]`)
+
+	// Update B project
+	bRenameRequest := `{ "name": "BProjectRenamed", "description": "BProjectDescription" }`
+	bProjectResponse = `{"id":1,"name":"BProjectRenamed","description":"BProjectDescription"}`
+	resp = putRequest(t, server, "/projects/1", bRenameRequest)
+	compareResponse(t, resp, http.StatusOK, bProjectResponse)
 
 	// Delete B project and get all projects without deleted B project
 	resp = deleteRequest(t, server, "/projects/1")
@@ -140,7 +147,7 @@ func TestColumns(t *testing.T) {
 	defer server.Close()
 	defer clearDBTables()
 
-	project := &models.Project{ ProjectBase: models.ProjectBase{ Name: "Test"} }
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	err := postgres.DB().Insert(project)
 	if err != nil {
 		t.Fatal(err)
@@ -152,7 +159,7 @@ func TestColumns(t *testing.T) {
 	defaultResponse := `{"id":1,"project_id":1,"name":"Default","position":1}`
 
 	// Create column
-	resp := postRequest(t, server, "/projects/1/columns" , columnRequest)
+	resp := postRequest(t, server, "/projects/1/columns", columnRequest)
 	compareResponse(t, resp, http.StatusOK, columnResponse)
 
 	// Get all columns sorted by priority
