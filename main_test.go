@@ -137,7 +137,7 @@ func TestProjects(t *testing.T) {
 	resp = getRequest(t, server, "/projects")
 	compareResponse(t, resp, http.StatusOK, `[`+aProjectResponse+`]`)
 
-	aProjectColumnResponse := `{"id":2,"project_id":2,"name":"Default","position":0}`
+	aProjectColumnResponse := `{"id":2,"project_id":2,"name":"default","position":0}`
 	// Column must be automatically created for project
 	resp = getRequest(t, server, "/projects/2/columns")
 	compareResponse(t, resp, http.StatusOK, `[`+aProjectColumnResponse+`]`)
@@ -157,7 +157,7 @@ func TestColumns(t *testing.T) {
 	columnRequest := `{ "name": "TestColumn" }`
 
 	columnResponse := `{"id":2,"project_id":1,"name":"TestColumn","position":0}`
-	defaultResponse := `{"id":1,"project_id":1,"name":"Default","position":1}`
+	defaultResponse := `{"id":1,"project_id":1,"name":"default","position":1}`
 
 	// Create column
 	resp := postRequest(t, server, "/projects/1/columns", columnRequest)

@@ -1,28 +1,27 @@
 package postgres
 
 import (
-	"github.com/go-pg/pg/v9"
+	"database/sql"
+	_ "github.com/lib/pq"
 	"sync"
 )
 
 var once sync.Once
-var db *pg.DB
+var db *sql.DB
 
-func Configure(host, port, user, password, database string) error {
+func Configure(databaseURL string) error {
 	var err error
 	once.Do(func() {
-		db = pg.Connect(&pg.Options{
-			Addr:     host + ":" + port,
-			User:     user,
-			Password: password,
-			Database: database,
-		})
+		db, err = sql.Open("postgres", databaseURL)
 	})
 
-	_, err = db.Exec("SELECT 1")
-	return err
+	if err != nil {
+		return err
+	}
+
+	 return db.Ping()
 }
 
-func DB() *pg.DB {
+func DB() *sql.DB {
 	return db
 }
