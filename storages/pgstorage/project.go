@@ -13,7 +13,7 @@ func (p *PostgresProjectsStorage) GetList() (*[]models.Project, error) {
 	return &projects, err
 }
 
-func (p *PostgresProjectsStorage) GetByID(id int) (*models.Project, error) {
+func (p *PostgresProjectsStorage) GetById(id int) (*models.Project, error) {
 	project := &models.Project{Id: id}
 	err := postgres.DB().Select(project)
 	return project, err

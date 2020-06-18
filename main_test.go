@@ -5,7 +5,7 @@ import (
 	"github.com/evsyukovmv/taskmanager/handlers"
 	"github.com/evsyukovmv/taskmanager/models"
 	"github.com/evsyukovmv/taskmanager/postgres"
-	"github.com/evsyukovmv/taskmanager/services/projects"
+	"github.com/evsyukovmv/taskmanager/services/projectsvc"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -149,7 +149,7 @@ func TestColumns(t *testing.T) {
 	defer clearDBTables()
 
 	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
-	err := projects.Storage().Create(project)
+	err := projectsvc.Create(project)
 	if err != nil {
 		t.Fatal(err)
 	}

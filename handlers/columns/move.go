@@ -3,7 +3,8 @@ package columns
 import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
-	"github.com/evsyukovmv/taskmanager/services/columns"
+	"github.com/evsyukovmv/taskmanager/models"
+	"github.com/evsyukovmv/taskmanager/services/columnsvc"
 	"github.com/go-chi/chi"
 	"net/http"
 	"strconv"
@@ -16,29 +17,19 @@ func Move(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, err := columns.Storage().GetByID(columnId)
+	cp := &models.ColumnPosition{}
+	err = json.NewDecoder(r.Body).Decode(cp)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	oldPosition := c.Position
-	err = json.NewDecoder(r.Body).Decode(&c.ColumnPosition)
+	c, err := columnsvc.Move(columnId, cp)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	if oldPosition == c.Position {
-		helpers.WriteJSON(w, c)
-		return
-	}
-
-	err = columns.Storage().Move(c)
-	if err != nil {
-		helpers.WriteError(w, err)
-		return
-	}
 
 	helpers.WriteJSON(w, c)
 }

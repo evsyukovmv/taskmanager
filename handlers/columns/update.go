@@ -3,7 +3,8 @@ package columns
 import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
-	"github.com/evsyukovmv/taskmanager/services/columns"
+	"github.com/evsyukovmv/taskmanager/models"
+	"github.com/evsyukovmv/taskmanager/services/columnsvc"
 	"github.com/go-chi/chi"
 	"net/http"
 	"strconv"
@@ -16,25 +17,14 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, err := columns.Storage().GetByID(columnId)
+	cb := &models.ColumnBase{}
+	err = json.NewDecoder(r.Body).Decode(cb)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&c.ColumnBase)
-	if err != nil {
-		helpers.WriteError(w, err)
-		return
-	}
-
-	err = validate(c)
-	if err != nil {
-		helpers.WriteError(w, err)
-		return
-	}
-
-	err = columns.Storage().Update(c)
+	c, err := columnsvc.Update(columnId, cb)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return

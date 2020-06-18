@@ -21,7 +21,7 @@ func (c *PostgresColumnsStorage) GetListByProjectId(projectId int) (*[]models.Co
 	return &columns, err
 }
 
-func (c *PostgresColumnsStorage) GetByID(id int) (*models.Column, error) {
+func (c *PostgresColumnsStorage) GetById(id int) (*models.Column, error) {
 	column := &models.Column{Id: id}
 	err := postgres.DB().Select(column)
 	return column, err

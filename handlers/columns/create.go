@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
 	"github.com/evsyukovmv/taskmanager/models"
-	"github.com/evsyukovmv/taskmanager/services/columns"
+	"github.com/evsyukovmv/taskmanager/services/columnsvc"
 	"github.com/go-chi/chi"
 	"net/http"
 	"strconv"
@@ -17,25 +17,19 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	column := &models.Column{ProjectId: projectId}
+	c := &models.Column{ProjectId: projectId}
 
-	err = json.NewDecoder(r.Body).Decode(&column.ColumnBase)
+	err = json.NewDecoder(r.Body).Decode(&c.ColumnBase)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = validate(column)
+	err = columnsvc.Create(c)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = columns.Storage().Create(column)
-	if err != nil {
-		helpers.WriteError(w, err)
-		return
-	}
-
-	helpers.WriteJSON(w, column)
+	helpers.WriteJSON(w, c)
 }

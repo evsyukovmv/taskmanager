@@ -1,11 +1,11 @@
-package columns
+package columnsvc
 
 import "github.com/evsyukovmv/taskmanager/models"
 
 type ColumnStorage interface {
 	GetCountsByProjectId(projectId int) (count int, err error)
 	GetListByProjectId(projectId int) (columns *[]models.Column, err error)
-	GetByID(id int) (*models.Column, error)
+	GetById(id int) (*models.Column, error)
 	Create(column *models.Column) error
 	Move(column *models.Column) error
 	Update(column *models.Column) error
