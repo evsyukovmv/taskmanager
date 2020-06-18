@@ -4,6 +4,7 @@ import (
 	"github.com/evsyukovmv/taskmanager/handlers"
 	"github.com/evsyukovmv/taskmanager/logger"
 	"github.com/evsyukovmv/taskmanager/postgres"
+	"github.com/evsyukovmv/taskmanager/services/columns"
 	"github.com/evsyukovmv/taskmanager/services/projects"
 	"github.com/evsyukovmv/taskmanager/storages/pgstorage"
 	"log"
@@ -40,6 +41,7 @@ func configurePostgres() {
 
 func configureServices() {
 	projects.NewService(&pgstorage.PostgresProjectsStorage{})
+	columns.NewService(&pgstorage.PostgresColumnsStorage{})
 }
 
 func startHTTPServer() {

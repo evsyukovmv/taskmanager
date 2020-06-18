@@ -3,20 +3,26 @@ package columns
 import (
 	"fmt"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
-	"github.com/evsyukovmv/taskmanager/postgres"
-	"github.com/go-pg/pg/v9"
+	"github.com/evsyukovmv/taskmanager/services/columns"
+	"github.com/go-chi/chi"
 	"net/http"
+	"strconv"
 )
 
 func Delete(w http.ResponseWriter, r *http.Request) {
-	column, err := findColumn(r)
+	columnId, err := strconv.Atoi(chi.URLParam(r, "columnId"))
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	var count int
-	_, err = postgres.DB().QueryOne(pg.Scan(&count), "SELECT COUNT (*) FROM columns WHERE project_id = ?", column.ProjectId)
+	c, err := columns.Storage().GetByID(columnId)
+	if err != nil {
+		helpers.WriteError(w, err)
+		return
+	}
+
+	count, err := columns.Storage().GetCountsByProjectId(c.ProjectId)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
@@ -27,11 +33,11 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = postgres.DB().Delete(column)
+	err = columns.Storage().Delete(c)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	helpers.WriteJSON(w, column)
+	helpers.WriteJSON(w, c)
 }

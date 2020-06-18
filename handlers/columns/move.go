@@ -3,64 +3,42 @@ package columns
 import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
-	"github.com/evsyukovmv/taskmanager/postgres"
+	"github.com/evsyukovmv/taskmanager/services/columns"
+	"github.com/go-chi/chi"
 	"net/http"
+	"strconv"
 )
 
 func Move(w http.ResponseWriter, r *http.Request) {
-	column, err := findColumn(r)
+	columnId, err := strconv.Atoi(chi.URLParam(r, "columnId"))
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	oldPosition := column.Position
-	err = json.NewDecoder(r.Body).Decode(&column.ColumnPosition)
+	c, err := columns.Storage().GetByID(columnId)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	if oldPosition == column.Position {
-		helpers.WriteJSON(w, column)
-		return
-	}
-
-	tx, err := postgres.DB().Begin()
+	oldPosition := c.Position
+	err = json.NewDecoder(r.Body).Decode(&c.ColumnPosition)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	_, err = postgres.DB().Exec("UPDATE columns SET position = NULL WHERE id = ?", column.Id)
-	if err != nil {
-		_ = tx.Rollback()
-		helpers.WriteError(w, err)
+	if oldPosition == c.Position {
+		helpers.WriteJSON(w, c)
 		return
 	}
 
-	_, err = postgres.DB().Exec(
-		"UPDATE columns SET position = position + 1 WHERE project_id = ?",
-		column.ProjectId, column.Position, column.Id,
-	)
-	if err != nil {
-		_ = tx.Rollback()
-		helpers.WriteError(w, err)
-		return
-	}
-
-	_, err = postgres.DB().Exec("UPDATE columns SET position = ? WHERE id = ?", column.Position, column.Id)
-	if err != nil {
-		_ = tx.Rollback()
-		helpers.WriteError(w, err)
-		return
-	}
-
-	err = tx.Commit()
+	err = columns.Storage().Move(c)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	helpers.WriteJSON(w, column)
+	helpers.WriteJSON(w, c)
 }

@@ -3,34 +3,42 @@ package columns
 import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
-	"github.com/evsyukovmv/taskmanager/postgres"
+	"github.com/evsyukovmv/taskmanager/services/columns"
+	"github.com/go-chi/chi"
 	"net/http"
+	"strconv"
 )
 
 func Update(w http.ResponseWriter, r *http.Request) {
-	column, err := findColumn(r)
+	columnId, err := strconv.Atoi(chi.URLParam(r, "columnId"))
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&column.ColumnBase)
+	c, err := columns.Storage().GetByID(columnId)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = validate(column)
+	err = json.NewDecoder(r.Body).Decode(&c.ColumnBase)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	err = postgres.DB().Update(column)
+	err = validate(c)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return
 	}
 
-	helpers.WriteJSON(w, column)
+	err = columns.Storage().Update(c)
+	if err != nil {
+		helpers.WriteError(w, err)
+		return
+	}
+
+	helpers.WriteJSON(w, c)
 }

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
 	"github.com/evsyukovmv/taskmanager/models"
-	"github.com/evsyukovmv/taskmanager/postgres"
+	"github.com/evsyukovmv/taskmanager/services/columns"
 	"github.com/go-chi/chi"
 	"net/http"
 	"strconv"
@@ -31,7 +31,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = postgres.DB().Insert(column)
+	err = columns.Storage().Create(column)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return

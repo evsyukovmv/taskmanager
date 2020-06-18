@@ -24,8 +24,8 @@ func (p *PostgresProjectsStorage) Create(project *models.Project) error {
 	if err != nil {
 		return err
 	}
-	c := &models.Column{ColumnBase: models.ColumnBase{ Name: "Default" }, ProjectId: project.Id}
-	err = postgres.DB().Insert(c)
+	column := &models.Column{ColumnBase: models.ColumnBase{ Name: "Default" }, ProjectId: project.Id}
+	err = postgres.DB().Insert(column)
 	return err
 }
 
