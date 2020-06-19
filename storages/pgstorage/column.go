@@ -155,19 +155,57 @@ func (c *PostgresColumnsStorage) Update(column *models.Column) error {
 }
 
 func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
+	tx, err := postgres.DB().Begin()
+	if err != nil {
+		return err
+	}
+
 	var leftColumnId int
-	queryLeftColumn := `SELECT id FROM columns WHERE project_id = $1 AND position < $2 ORDER BY position ASC LIMIT 1`
-	row := postgres.DB().QueryRow(queryLeftColumn, column.ProjectId, column.Position)
-	if err := row.Scan(&leftColumnId); err != nil {
-		return err
+
+	{
+		queryLeftColumn := `SELECT id FROM columns WHERE project_id = $1 AND position < $2 ORDER BY position ASC LIMIT 1`
+		stmt, err := tx.Prepare(queryLeftColumn)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		defer stmt.Close()
+
+		if err := stmt.QueryRow(column.ProjectId, column.Position).Scan(&leftColumnId); err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
-	sqlMove := `UPDATE tasks SET column_id = $1 WHERE column_id = $2`
-	if _, err := postgres.DB().Exec(sqlMove, leftColumnId, column.Id); err != nil {
-		return err
+	{
+		sqlMove := `UPDATE tasks SET column_id = $1 WHERE column_id = $2`
+		stmt, err := tx.Prepare(sqlMove)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		defer stmt.Close()
+
+		if _, err := stmt.Exec(leftColumnId, column.Id); err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
-	sqlDelete := `DELETE FROM columns WHERE id = $1`
-	_, err := postgres.DB().Exec(sqlDelete, column.Id)
-	return err
+	{
+		sqlDelete := `DELETE FROM columns WHERE id = $1`
+		stmt, err := tx.Prepare(sqlDelete)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		defer stmt.Close()
+
+		if _, err := stmt.Exec(column.Id); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
