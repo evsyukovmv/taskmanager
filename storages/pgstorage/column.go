@@ -7,12 +7,6 @@ import (
 
 type PostgresColumnsStorage struct {}
 
-func (c *PostgresColumnsStorage) GetCountsByProjectId(projectId int) (count int, err error) {
-	row := postgres.DB().QueryRow("SELECT COUNT (*) FROM columns WHERE project_id = $1", projectId)
-	err = row.Scan(&count)
-	return
-}
-
 func (c *PostgresColumnsStorage) GetListByProjectId(projectId int) (*[]models.Column, error) {
 	var columns []models.Column
 
@@ -79,14 +73,15 @@ func (c *PostgresColumnsStorage) Create(column *models.Column) error {
 	return tx.Commit()
 }
 
-func (c *PostgresColumnsStorage) Move(column *models.Column) error {
+func (c *PostgresColumnsStorage) Move(column *models.Column, newPosition int) error {
 	tx, err := postgres.DB().Begin()
 	if err != nil {
 		return err
 	}
 
 	{
-		stmt, err := tx.Prepare(`UPDATE columns SET position = NULL WHERE id = $1`)
+		querySetToNull := `UPDATE columns SET position = NULL WHERE id = $1`
+		stmt, err := tx.Prepare(querySetToNull)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -100,34 +95,57 @@ func (c *PostgresColumnsStorage) Move(column *models.Column) error {
 	}
 
 	{
-		stmt, err := tx.Prepare(`UPDATE columns SET position = position + 1 WHERE project_id = $1`)
+		queryDecrement := `UPDATE columns SET position = position - 1 WHERE project_id = $1 AND position > $2`
+		stmt, err := tx.Prepare(queryDecrement)
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
-		if _, err := stmt.Exec(column.ProjectId); err != nil {
+		if _, err := stmt.Exec(column.ProjectId, column.Position); err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
 	{
-		stmt, err := tx.Prepare(`UPDATE columns SET position = $1 WHERE id = $2`)
+		queryIncrement := `UPDATE columns SET position = position + 1 WHERE project_id = $1 AND position >= $2`
+		stmt, err := tx.Prepare(queryIncrement)
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
-		if _, err := stmt.Exec(column.Position, column.Id); err != nil {
+		if _, err := stmt.Exec(column.ProjectId, newPosition); err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
-	return tx.Commit()
+	{
+		queryUpdatePosition := `UPDATE columns SET position = $2 WHERE id = $1`
+		stmt, err := tx.Prepare(queryUpdatePosition)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		defer stmt.Close()
+
+		if _, err := stmt.Exec(column.Id, newPosition); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	column.Position = newPosition
+
+	return nil
 }
 
 func (c *PostgresColumnsStorage) Update(column *models.Column) error {
@@ -137,7 +155,19 @@ func (c *PostgresColumnsStorage) Update(column *models.Column) error {
 }
 
 func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
-	sqlDelete := `DELETE FROM columns WHERE id = $1;`
+	var leftColumnId int
+	queryLeftColumn := `SELECT id FROM columns WHERE project_id = $1 AND position < $2 ORDER BY position ASC LIMIT 1`
+	row := postgres.DB().QueryRow(queryLeftColumn, column.ProjectId, column.Position)
+	if err := row.Scan(&leftColumnId); err != nil {
+		return err
+	}
+
+	sqlMove := `UPDATE tasks SET column_id = $1 WHERE column_id = $2`
+	if _, err := postgres.DB().Exec(sqlMove, leftColumnId, column.Id); err != nil {
+		return err
+	}
+
+	sqlDelete := `DELETE FROM columns WHERE id = $1`
 	_, err := postgres.DB().Exec(sqlDelete, column.Id)
 	return err
 }

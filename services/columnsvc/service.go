@@ -41,13 +41,8 @@ func Delete(columnId int) (*models.Column, error) {
 		return c, err
 	}
 
-	count, err := singleton.storage.GetCountsByProjectId(c.ProjectId)
-	if err != nil {
-		return c, err
-	}
-
-	if count == 1 {
-		return c, fmt.Errorf("deleting last column is not allowed")
+	if c.Position == 0 {
+		return c, fmt.Errorf("deleting the first column is not allowed")
 	}
 	err = singleton.storage.Delete(c)
 	return c, err
@@ -70,9 +65,8 @@ func Move(columnId int, cp *models.ColumnPosition) (*models.Column, error){
 	if cp.Position == c.Position {
 		return c, nil
 	}
-	c.ColumnPosition = *cp
 
-	err = singleton.storage.Move(c)
+	err = singleton.storage.Move(c, cp.Position)
 	return c, err
 }
 

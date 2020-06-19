@@ -21,6 +21,10 @@ func NewService(ps ProjectStorage) {
 	})
 }
 
+func Get() service {
+	return singleton
+}
+
 func validate(column *models.Project) error {
 	return singleton.validate.Struct(column)
 }

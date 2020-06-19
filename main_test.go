@@ -179,20 +179,22 @@ func TestColumns(t *testing.T) {
 
 	// Move column position
 	moveRequest := `{ "position": 0 }`
-	columnResponse = `{"id":1,"project_id":1,"name":"RenamedColumn","position":0}`
+	defaultResponse = `{"id":1,"project_id":1,"name":"RenamedColumn","position":0}`
+	columnResponse = `{"id":2,"project_id":1,"name":"TestColumn","position":1}`
 	resp = putRequest(t, server, "/projects/1/columns/1/move", moveRequest)
-	compareResponse(t, resp, http.StatusOK, columnResponse)
+	compareResponse(t, resp, http.StatusOK, defaultResponse)
 
 	// Delete column and get all projects without deleted column
-	resp = deleteRequest(t, server, "/projects/1/columns/1")
+	resp = deleteRequest(t, server, "/projects/1/columns/2")
 	compareResponse(t, resp, http.StatusOK, columnResponse)
+
 	resp = getRequest(t, server, "/projects/1/columns")
 	columnResponse = `{"id":2,"project_id":1,"name":"TestColumn","position":1}`
-	compareResponse(t, resp, http.StatusOK, `[`+columnResponse+`]`)
+	compareResponse(t, resp, http.StatusOK, `[`+defaultResponse+`]`)
 
 	// Deleting last column is not allowed
-	resp = deleteRequest(t, server, "/projects/1/columns/2")
-	compareResponse(t, resp, http.StatusBadRequest, `{ error: "deleting last column is not allowed" }`)
+	resp = deleteRequest(t, server, "/projects/1/columns/1")
+	compareResponse(t, resp, http.StatusBadRequest, `{ error: "deleting the first column is not allowed" }`)
 }
 
 func TestNotFound(t *testing.T) {
