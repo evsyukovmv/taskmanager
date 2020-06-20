@@ -1,6 +1,7 @@
 package pgstorage
 
 import (
+	"fmt"
 	"github.com/evsyukovmv/taskmanager/models"
 	"github.com/evsyukovmv/taskmanager/postgres"
 )
@@ -161,6 +162,7 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 	}
 
 	var leftColumnId int
+	var maxLeftPosition int
 
 	{
 		queryLeftColumn := `SELECT id FROM columns WHERE project_id = $1 AND position < $2 ORDER BY position ASC LIMIT 1`
@@ -178,7 +180,22 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 	}
 
 	{
-		sqlMove := `UPDATE tasks SET column_id = $1 WHERE column_id = $2`
+		queryMaxLeftPosition := `SELECT coalesce(max(position), -1) FROM tasks WHERE column_id = $1`
+		stmt, err := tx.Prepare(queryMaxLeftPosition)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		defer stmt.Close()
+
+		if err := stmt.QueryRow(leftColumnId).Scan(&maxLeftPosition); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	{
+		sqlMove := `UPDATE tasks SET column_id = $1, position = position + $3 WHERE column_id = $2`
 		stmt, err := tx.Prepare(sqlMove)
 		if err != nil {
 			tx.Rollback()
@@ -186,7 +203,8 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 		}
 		defer stmt.Close()
 
-		if _, err := stmt.Exec(leftColumnId, column.Id); err != nil {
+		fmt.Println("leftColumnId", leftColumnId, "column.Id", column.Id, "maxLeftPosition: ", maxLeftPosition)
+		if _, err := stmt.Exec(leftColumnId, column.Id, maxLeftPosition + 1); err != nil {
 			tx.Rollback()
 			return err
 		}

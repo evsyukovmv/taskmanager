@@ -6,6 +6,7 @@ import (
 	"github.com/evsyukovmv/taskmanager/handlers"
 	"github.com/evsyukovmv/taskmanager/models"
 	"github.com/evsyukovmv/taskmanager/postgres"
+	"github.com/evsyukovmv/taskmanager/services/columnsvc"
 	"github.com/evsyukovmv/taskmanager/services/projectsvc"
 	"io/ioutil"
 	"net/http"
@@ -223,6 +224,109 @@ func TestColumns(t *testing.T) {
 	}
 
 	for _, testData := range columnsTestData {
+		if err := verifyResponse(t, server, testData); err != nil {
+			t.Error(err)
+			break
+		}
+	}
+}
+
+var tasksTestData = [...]testRequestResponse{
+	{
+		message:       "should create task",
+		requestMethod: "POST",
+		requestPath:   "/projects/1/columns/2/tasks",
+		requestData:   `{ "name": "TestTask", "description": "TestTask description" }`,
+		responseCode:  http.StatusOK,
+		responseData:  `{"id":1,"column_id":2,"name":"TestTask","description":"TestTask description","position":0}`,
+	},
+	{
+		message:       "should get task by id",
+		requestMethod: "GET",
+		requestPath:   "/projects/1/columns/2/tasks/1",
+		responseCode:  http.StatusOK,
+		responseData:  `{"id":1,"column_id":2,"name":"TestTask","description":"TestTask description","position":0}`,
+	},
+	{
+		message:       "should create another task",
+		requestMethod: "POST",
+		requestPath:   "/projects/1/columns/2/tasks",
+		requestData:   `{ "name": "TestTask2", "description": "TestTask2 description" }`,
+		responseCode:  http.StatusOK,
+		responseData:  `{"id":2,"column_id":2,"name":"TestTask2","description":"TestTask2 description","position":0}`,
+	},
+	{
+		message:       "should get tasks list",
+		requestMethod: "GET",
+		requestPath:   "/projects/1/columns/2/tasks",
+		responseCode:  http.StatusOK,
+		responseData:  `[{"id":2,"column_id":2,"name":"TestTask2","description":"TestTask2 description","position":0},{"id":1,"column_id":2,"name":"TestTask","description":"TestTask description","position":1}]`,
+	},
+	{
+		message:       "should update task",
+		requestMethod: "PUT",
+		requestPath:   "/projects/1/columns/2/tasks/1",
+		requestData:   `{ "name": "TestTask1", "description": "TestTask1 description" }`,
+		responseCode:  http.StatusOK,
+		responseData:  `{"id":1,"column_id":2,"name":"TestTask1","description":"TestTask1 description","position":1}`,
+	},
+	{
+		message:       "should move task",
+		requestMethod: "PUT",
+		requestPath:   "/projects/1/columns/2/tasks/1/move",
+		requestData:   `{ "position": 0 }`,
+		responseCode:  http.StatusOK,
+		responseData:  `{"id":1,"column_id":2,"name":"TestTask1","description":"TestTask1 description","position":0}`,
+	},
+	{
+		message:       "should remove task",
+		requestMethod: "DELETE",
+		requestPath:   "/projects/1/columns/2/tasks/2",
+		responseCode:  http.StatusOK,
+		responseData:  `{"id":2,"column_id":2,"name":"TestTask2","description":"TestTask2 description","position":1}`,
+	},
+	{
+		message:       "should create task in another column",
+		requestMethod: "POST",
+		requestPath:   "/projects/1/columns/1/tasks",
+		requestData:   `{ "name": "TestTaskColumn1" }`,
+		responseCode:  http.StatusOK,
+		responseData:  `{"id":3,"column_id":1,"name":"TestTaskColumn1","description":"","position":0}`,
+	},
+	{
+		message:       "should delete right column",
+		requestMethod: "DELETE",
+		requestPath:   "/projects/1/columns/1",
+		responseCode:  http.StatusOK,
+		responseData:  `{"id":1,"project_id":1,"name":"default","position":1}`,
+	},
+	{
+		message:       "should append tasks from right deleted column to left",
+		requestMethod: "GET",
+		requestPath:   "/projects/1/columns/2/tasks",
+		responseCode:  http.StatusOK,
+		responseData:  `[{"id":1,"column_id":2,"name":"TestTask1","description":"TestTask1 description","position":0},{"id":3,"column_id":2,"name":"TestTaskColumn1","description":"","position":1}]`,
+	},
+}
+
+func TestTasks(t *testing.T) {
+	server := setupServer()
+	defer server.Close()
+	defer clearDBTables()
+
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "TestProject"}}
+	if err := projectsvc.Create(project); err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	column := &models.Column{ColumnBase: models.ColumnBase{Name: "TestColumn"}, ProjectId: project.Id}
+	if err := columnsvc.Create(column); err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	for _, testData := range tasksTestData {
 		if err := verifyResponse(t, server, testData); err != nil {
 			t.Error(err)
 			break

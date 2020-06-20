@@ -7,7 +7,7 @@ import (
 )
 
 func WriteError(w http.ResponseWriter, err error) {
-	logger.Info(err.Error())
+	logger.Error(err.Error())
 	w.WriteHeader(http.StatusBadRequest)
 	w.Write([]byte(`{ error: "` + err.Error() + `" }`))
 }
