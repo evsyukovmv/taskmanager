@@ -53,6 +53,7 @@ func tasksRouter() http.Handler {
 	r.Get("/{taskId}", tasks.GetById)
 	r.Put("/{taskId}", tasks.Update)
 	r.Put("/{taskId}/move", tasks.Move)
+	r.Put("/{taskId}/shift", tasks.Shift)
 	r.Delete("/{taskId}", tasks.Delete)
 
 	r.Mount("/{taskId}/comments", commentsRouter())

@@ -41,7 +41,10 @@ func ErrorWithContext(ctx context.Context, msg string, fields ...zap.Field) {
 		ctxRqId = "undefined"
 	}
 
-	instance.Error(msg, zap.String("requestId", ctxRqId))
+	zapFields := make([]zap.Field, 1 + len(fields))
+	zapFields[0] = zap.String("requestId", ctxRqId)
+	zapFields = append(zapFields, fields...)
+	instance.Error(msg, zapFields...)
 }
 
 func DPanic(msg string, fields ...zap.Field) {

@@ -85,3 +85,7 @@ func Update(columnId int, cb *models.ColumnBase) (*models.Column, error) {
 	err = singleton.storage.Update(c)
 	return c, err
 }
+
+func IsSameProject(columnsIds ...int) (bool, error) {
+	return singleton.storage.InSameProject(columnsIds...)
+}

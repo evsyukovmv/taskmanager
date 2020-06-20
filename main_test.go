@@ -66,7 +66,7 @@ func verifyResponse(t *testing.T, server *httptest.Server, trr testRequestRespon
 
 	if sBody != trr.responseData {
 		return fmt.Errorf(
-			"%s\n unexpected response:\n \tgot %v\n\twant %v",
+			"%s\n unexpected response:\n \tgot\t%v\n\twant\t%v",
 			trr.message,
 			sBody,
 			trr.responseData,
@@ -288,11 +288,27 @@ var tasksTestData = [...]testRequestResponse{
 		responseData:  `{"id":1,"column_id":2,"name":"TestTask1","description":"TestTask1 description","position":0}`,
 	},
 	{
+		message:       "should shift task to another column",
+		requestMethod: "PUT",
+		requestPath:   "/projects/1/columns/2/tasks/2/shift",
+		requestData:   `{ "column_id": 1 }`,
+		responseCode:  http.StatusOK,
+		responseData:  `{"id":2,"column_id":1,"name":"TestTask2","description":"TestTask2 description","position":1}`,
+	},
+	{
+		message:       "should return error if shift to column in another project",
+		requestMethod: "PUT",
+		requestPath:   "/projects/1/columns/2/tasks/2/shift",
+		requestData:   `{ "column_id": 3 }`,
+		responseCode:  http.StatusBadRequest,
+		responseData:  `{ error: "columns must be in the same project" }`,
+	},
+	{
 		message:       "should remove task",
 		requestMethod: "DELETE",
-		requestPath:   "/projects/1/columns/2/tasks/2",
+		requestPath:   "/projects/1/columns/1/tasks/2",
 		responseCode:  http.StatusOK,
-		responseData:  `{"id":2,"column_id":2,"name":"TestTask2","description":"TestTask2 description","position":1}`,
+		responseData:  `{"id":2,"column_id":1,"name":"TestTask2","description":"TestTask2 description","position":1}`,
 	},
 	{
 		message:       "should create task in another column",
@@ -323,14 +339,20 @@ func TestTasks(t *testing.T) {
 	defer server.Close()
 	defer clearDBTables()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{Name: "TestProject"}}
-	if err := projectsvc.Create(project); err != nil {
+	project1 := &models.Project{ProjectBase: models.ProjectBase{Name: "TestProject"}}
+	if err := projectsvc.Create(project1); err != nil {
 		t.Fatal(err)
 		return
 	}
 
-	column := &models.Column{ColumnBase: models.ColumnBase{Name: "TestColumn"}, ProjectId: project.Id}
+	column := &models.Column{ColumnBase: models.ColumnBase{Name: "TestColumn"}, ProjectId: project1.Id}
 	if err := columnsvc.Create(column); err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	project2 := &models.Project{ProjectBase: models.ProjectBase{Name: "TestProject"}}
+	if err := projectsvc.Create(project2); err != nil {
 		t.Fatal(err)
 		return
 	}
@@ -416,7 +438,7 @@ func TestComments(t *testing.T) {
 		return
 	}
 
-	task := &models.Task{TaskBase: models.TaskBase{Name: "TestTask"}, ColumnId: 1}
+	task := &models.Task{TaskBase: models.TaskBase{Name: "TestTask"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
 	if err := tasksvc.Create(task); err != nil {
 		t.Fatal(err)
 		return

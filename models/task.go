@@ -9,9 +9,13 @@ type TaskPosition struct {
 	Position int `json:"position"`
 }
 
+type TaskColumn struct {
+	ColumnId int `json:"column_id"`
+}
+
 type Task struct {
 	Id int `json:"id"`
-	ColumnId int `json:"column_id"`
+	TaskColumn
 	TaskBase
 	TaskPosition
 }

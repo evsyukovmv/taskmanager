@@ -7,6 +7,7 @@ type TaskStorage interface {
 	GetById(id int) (*models.Task, error)
 	Create(task *models.Task) error
 	Move(task *models.Task, newPosition int) error
+	Shift(task *models.Task, columnId int) error
 	Update(task *models.Task) error
 	Delete(task *models.Task) error
 }

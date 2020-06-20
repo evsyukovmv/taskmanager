@@ -148,6 +148,48 @@ func (c *PostgresTasksStorage) Move(task *models.Task, newPosition int) error {
 	return nil
 }
 
+func (c *PostgresTasksStorage) Shift(task *models.Task, columnId int) error {
+	tx, err := postgres.DB().Begin()
+	if err != nil {
+		return err
+	}
+
+	var maxPosition int
+
+	{
+		queryMaxLeftPosition := `SELECT coalesce(max(position), -1) FROM tasks WHERE column_id = $1`
+		stmt, err := tx.Prepare(queryMaxLeftPosition)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		defer stmt.Close()
+
+		if err := stmt.QueryRow(columnId).Scan(&maxPosition); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	{
+		sqlMove := `UPDATE tasks SET column_id = $2, position = position + $3 WHERE id = $1`
+		stmt, err := tx.Prepare(sqlMove)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		defer stmt.Close()
+
+		if _, err := stmt.Exec(task.Id, columnId, maxPosition + 1); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	task.ColumnId = columnId
+
+	return tx.Commit()
+}
+
 func (c *PostgresTasksStorage) Update(task *models.Task) error {
 	sqlUpdate := `UPDATE tasks SET name = $2, description = $3 WHERE id = $1`
 	_, err := postgres.DB().Exec(sqlUpdate, task.Id, task.Name, task.Description)

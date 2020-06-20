@@ -1,13 +1,15 @@
 package tasksvc
 
 import (
+	"fmt"
+	"github.com/evsyukovmv/taskmanager/services/columnsvc"
 	"github.com/evsyukovmv/taskmanager/models"
 	"github.com/go-playground/validator/v10"
 	"sync"
 )
 
 type service struct {
-	storage TaskStorage
+	storage  TaskStorage
 	validate *validator.Validate
 }
 
@@ -52,7 +54,7 @@ func GetListByColumnId(taskId int) (*[]models.Task, error) {
 	return singleton.storage.GetListByColumnId(taskId)
 }
 
-func Move(taskId int, cp *models.TaskPosition) (*models.Task, error){
+func Move(taskId int, cp *models.TaskPosition) (*models.Task, error) {
 	c, err := singleton.storage.GetById(taskId)
 	if err != nil {
 		return c, err
@@ -64,6 +66,28 @@ func Move(taskId int, cp *models.TaskPosition) (*models.Task, error){
 
 	err = singleton.storage.Move(c, cp.Position)
 	return c, err
+}
+
+func Shift(taskId int, tc *models.TaskColumn) (*models.Task, error) {
+	t, err := singleton.storage.GetById(taskId)
+	if err != nil {
+		return t, err
+	}
+
+	if tc.ColumnId == t.ColumnId {
+		return t, nil
+	}
+
+	inSameProject, err := columnsvc.IsSameProject(t.ColumnId, tc.ColumnId)
+	if err != nil {
+		return t, err
+	}
+	if !inSameProject {
+		return t, fmt.Errorf("columns must be in the same project")
+	}
+
+	err = singleton.storage.Shift(t, tc.ColumnId)
+	return t, err
 }
 
 func Update(taskId int, tb *models.TaskBase) (*models.Task, error) {

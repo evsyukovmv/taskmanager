@@ -10,26 +10,26 @@ import (
 	"strconv"
 )
 
-func Create(w http.ResponseWriter, r *http.Request) {
-	columnId, err := strconv.Atoi(chi.URLParam(r, "columnId"))
+func Shift(w http.ResponseWriter, r *http.Request) {
+	taskId, err := strconv.Atoi(chi.URLParam(r, "taskId"))
 	if err != nil {
 		helpers.WriteError(w, r, err)
 		return
 	}
 
-	t := &models.Task{TaskColumn: models.TaskColumn{ ColumnId: columnId }}
-
-	err = json.NewDecoder(r.Body).Decode(&t.TaskBase)
+	tc := &models.TaskColumn{}
+	err = json.NewDecoder(r.Body).Decode(tc)
 	if err != nil {
 		helpers.WriteError(w, r, err)
 		return
 	}
 
-	err = tasksvc.Create(t)
+	c, err := tasksvc.Shift(taskId, tc)
 	if err != nil {
 		helpers.WriteError(w, r, err)
 		return
 	}
 
-	helpers.WriteJSON(w, r, t)
+
+	helpers.WriteJSON(w, r, c)
 }

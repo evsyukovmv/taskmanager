@@ -1,9 +1,9 @@
 package pgstorage
 
 import (
-	"fmt"
 	"github.com/evsyukovmv/taskmanager/models"
 	"github.com/evsyukovmv/taskmanager/postgres"
+	"strconv"
 )
 
 type PostgresColumnsStorage struct {}
@@ -203,7 +203,6 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 		}
 		defer stmt.Close()
 
-		fmt.Println("leftColumnId", leftColumnId, "column.Id", column.Id, "maxLeftPosition: ", maxLeftPosition)
 		if _, err := stmt.Exec(leftColumnId, column.Id, maxLeftPosition + 1); err != nil {
 			tx.Rollback()
 			return err
@@ -226,4 +225,21 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 	}
 
 	return tx.Commit()
+}
+
+func (c *PostgresColumnsStorage) InSameProject(columnIds ...int) (bool, error) {
+	var count int
+	ids := ""
+	for _, v := range columnIds {
+		if len(ids) > 0 {
+			ids += ","
+		}
+		ids += strconv.Itoa(v)
+	}
+	query := `SELECT COUNT(DISTINCT(project_id)) FROM columns WHERE id IN (` + ids +`)`
+	if err := postgres.DB().QueryRow(query).Scan(&count); err != nil {
+		return false, err
+	}
+
+	return count == 1, nil
 }

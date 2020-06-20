@@ -9,4 +9,5 @@ type ColumnStorage interface {
 	Move(column *models.Column, newPosition int) error
 	Update(column *models.Column) error
 	Delete(column *models.Column) error
+	InSameProject(columnIds ...int) (bool, error)
 }
