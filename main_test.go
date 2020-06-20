@@ -8,19 +8,22 @@ import (
 	"github.com/evsyukovmv/taskmanager/postgres"
 	"github.com/evsyukovmv/taskmanager/services/columnsvc"
 	"github.com/evsyukovmv/taskmanager/services/projectsvc"
+	"github.com/evsyukovmv/taskmanager/services/tasksvc"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"testing"
 )
 
 type testRequestResponse struct {
-	message       string
-	requestMethod string
-	requestPath   string
-	requestData   string
-	responseCode  int
-	responseData  string
+	message            string
+	requestMethod      string
+	requestPath        string
+	requestData        string
+	responseCode       int
+	responseData       string
+	responseSkipFields []string
 }
 
 func setupServer() *httptest.Server {
@@ -55,11 +58,17 @@ func verifyResponse(t *testing.T, server *httptest.Server, trr testRequestRespon
 		t.Fatal(err)
 	}
 
-	if string(body) != trr.responseData {
+	sBody := string(body)
+	for _, field := range trr.responseSkipFields {
+		reg := regexp.MustCompile(`"` + field + `":"[\d\w\s-:\.]+"\,`)
+		sBody = reg.ReplaceAllString(sBody, "")
+	}
+
+	if sBody != trr.responseData {
 		return fmt.Errorf(
 			"%s\n unexpected response:\n \tgot %v\n\twant %v",
 			trr.message,
-			string(body),
+			sBody,
 			trr.responseData,
 		)
 	}
@@ -327,6 +336,93 @@ func TestTasks(t *testing.T) {
 	}
 
 	for _, testData := range tasksTestData {
+		if err := verifyResponse(t, server, testData); err != nil {
+			t.Error(err)
+			break
+		}
+	}
+}
+
+var commentsTestData = [...]testRequestResponse{
+	{
+		message:            "should create comment",
+		requestMethod:      "POST",
+		requestPath:        "/projects/1/columns/1/tasks/1/comments",
+		requestData:        `{ "text": "TestComment1" }`,
+		responseCode:       http.StatusOK,
+		responseData:       `{"id":1,"task_id":1,"text":"TestComment1"}`,
+		responseSkipFields: []string{"created_at"},
+	},
+	{
+		message:            "should get comment by id",
+		requestMethod:      "GET",
+		requestPath:        "/projects/1/columns/1/tasks/1/comments/1",
+		responseCode:       http.StatusOK,
+		responseData:       `{"id":1,"task_id":1,"text":"TestComment1"}`,
+		responseSkipFields: []string{"created_at"},
+	},
+	{
+		message:            "should create another comment",
+		requestMethod:      "POST",
+		requestPath:        "/projects/1/columns/1/tasks/1/comments",
+		requestData:        `{ "text": "TestComment2" }`,
+		responseCode:       http.StatusOK,
+		responseData:       `{"id":2,"task_id":1,"text":"TestComment2"}`,
+		responseSkipFields: []string{"created_at"},
+	},
+	{
+		message:            "should get comments list sorted by creation date",
+		requestMethod:      "GET",
+		requestPath:        "/projects/1/columns/1/tasks/1/comments",
+		responseCode:       http.StatusOK,
+		responseData:       `[{"id":2,"task_id":1,"text":"TestComment2"},{"id":1,"task_id":1,"text":"TestComment1"}]`,
+		responseSkipFields: []string{"created_at"},
+	},
+	{
+		message:            "should update comment",
+		requestMethod:      "PUT",
+		requestPath:        "/projects/1/columns/1/tasks/1/comments/1",
+		requestData:        `{ "text": "UpdatedComment1" }`,
+		responseCode:       http.StatusOK,
+		responseData:       `{"id":1,"task_id":1,"text":"UpdatedComment1"}`,
+		responseSkipFields: []string{"created_at"},
+	},
+	{
+		message:            "should remove comment",
+		requestMethod:      "DELETE",
+		requestPath:        "/projects/1/columns/1/tasks/1/comments/1",
+		responseCode:       http.StatusOK,
+		responseData:       `{"id":1,"task_id":1,"text":"UpdatedComment1"}`,
+		responseSkipFields: []string{"created_at"},
+	},
+	{
+		message:            "should get comments list without deleted",
+		requestMethod:      "GET",
+		requestPath:        "/projects/1/columns/1/tasks/1/comments",
+		responseCode:       http.StatusOK,
+		responseData:       `[{"id":2,"task_id":1,"text":"TestComment2"}]`,
+		responseSkipFields: []string{"created_at"},
+	},
+}
+
+func TestComments(t *testing.T) {
+	server := setupServer()
+	defer server.Close()
+	defer clearDBTables()
+
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "TestProject"}}
+	if err := projectsvc.Create(project); err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	task := &models.Task{TaskBase: models.TaskBase{Name: "TestTask"}, ColumnId: 1}
+	if err := tasksvc.Create(task); err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	for _, testData := range commentsTestData {
 		if err := verifyResponse(t, server, testData); err != nil {
 			t.Error(err)
 			break

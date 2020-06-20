@@ -5,6 +5,7 @@ import (
 	"github.com/evsyukovmv/taskmanager/logger"
 	"github.com/evsyukovmv/taskmanager/postgres"
 	"github.com/evsyukovmv/taskmanager/services/columnsvc"
+	"github.com/evsyukovmv/taskmanager/services/commentsvc"
 	"github.com/evsyukovmv/taskmanager/services/projectsvc"
 	"github.com/evsyukovmv/taskmanager/services/tasksvc"
 	"github.com/evsyukovmv/taskmanager/storages/pgstorage"
@@ -38,6 +39,7 @@ func configureServices() {
 	projectsvc.NewService(&pgstorage.PostgresProjectsStorage{})
 	columnsvc.NewService(&pgstorage.PostgresColumnsStorage{})
 	tasksvc.NewService(&pgstorage.PostgresTasksStorage{})
+	commentsvc.NewService(&pgstorage.PostgresCommentsStorage{})
 }
 
 func startHTTPServer() {

@@ -3,7 +3,7 @@ package models
 import "time"
 
 type CommentBase struct {
-	Text string `json:"text" validate:"lte=5000"`
+	Text string `json:"text" validate:"required,lte=5000"`
 }
 
 type Comment struct {
