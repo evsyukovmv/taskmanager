@@ -6,16 +6,17 @@ import (
 	"net/http"
 )
 
-func WriteError(w http.ResponseWriter, err error) {
-	logger.Error(err.Error())
+func WriteError(w http.ResponseWriter, r *http.Request, err error) {
+	logger.ErrorWithContext(r.Context(), err.Error())
+
 	w.WriteHeader(http.StatusBadRequest)
 	w.Write([]byte(`{ error: "` + err.Error() + `" }`))
 }
 
-func WriteJSON(w http.ResponseWriter, data interface{}) {
+func WriteJSON(w http.ResponseWriter, r *http.Request, data interface{}) {
 	body, err := json.Marshal(data)
 	if err != nil {
-		WriteError(w, err)
+		WriteError(w, r, err)
 		return
 	}
 

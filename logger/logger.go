@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"context"
+	"github.com/go-chi/chi/middleware"
 	"go.uber.org/zap"
 	"sync"
 )
@@ -31,6 +33,15 @@ func Warn(msg string, fields ...zap.Field) {
 
 func Error(msg string, fields ...zap.Field) {
 	instance.Error(msg, fields...)
+}
+
+func ErrorWithContext(ctx context.Context, msg string, fields ...zap.Field) {
+	ctxRqId, ok := ctx.Value(middleware.RequestIDKey).(string)
+	if !ok {
+		ctxRqId = "undefined"
+	}
+
+	instance.Error(msg, zap.String("requestId", ctxRqId))
 }
 
 func DPanic(msg string, fields ...zap.Field) {

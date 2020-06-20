@@ -9,9 +9,9 @@ import (
 func GetList(w http.ResponseWriter, r *http.Request) {
 	p, err := projectsvc.GetList()
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
-	helpers.WriteJSON(w, p)
+	helpers.WriteJSON(w, r, p)
 }

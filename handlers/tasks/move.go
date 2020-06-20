@@ -13,23 +13,23 @@ import (
 func Move(w http.ResponseWriter, r *http.Request) {
 	taskId, err := strconv.Atoi(chi.URLParam(r, "taskId"))
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	tp := &models.TaskPosition{}
 	err = json.NewDecoder(r.Body).Decode(tp)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	c, err := tasksvc.Move(taskId, tp)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 
-	helpers.WriteJSON(w, c)
+	helpers.WriteJSON(w, r, c)
 }

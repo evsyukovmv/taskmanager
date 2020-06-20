@@ -13,23 +13,23 @@ import (
 func Move(w http.ResponseWriter, r *http.Request) {
 	columnId, err := strconv.Atoi(chi.URLParam(r, "columnId"))
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	cp := &models.ColumnPosition{}
 	err = json.NewDecoder(r.Body).Decode(cp)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	c, err := columnsvc.Move(columnId, cp)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 
-	helpers.WriteJSON(w, c)
+	helpers.WriteJSON(w, r, c)
 }

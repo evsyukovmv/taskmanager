@@ -13,22 +13,22 @@ import (
 func Update(w http.ResponseWriter, r *http.Request) {
 	taskId, err := strconv.Atoi(chi.URLParam(r, "taskId"))
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	tb := &models.TaskBase{}
 	err = json.NewDecoder(r.Body).Decode(tb)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	c, err := tasksvc.Update(taskId, tb)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
-	helpers.WriteJSON(w, c)
+	helpers.WriteJSON(w, r, c)
 }

@@ -13,7 +13,7 @@ import (
 func Create(w http.ResponseWriter, r *http.Request) {
 	columnId, err := strconv.Atoi(chi.URLParam(r, "columnId"))
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
@@ -21,15 +21,15 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewDecoder(r.Body).Decode(&t.TaskBase)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	err = tasksvc.Create(t)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
-	helpers.WriteJSON(w, t)
+	helpers.WriteJSON(w, r, t)
 }

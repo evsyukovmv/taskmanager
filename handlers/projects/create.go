@@ -13,15 +13,15 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&p.ProjectBase)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	err = projectsvc.Create(&p)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
-	helpers.WriteJSON(w, &p)
+	helpers.WriteJSON(w, r, &p)
 }

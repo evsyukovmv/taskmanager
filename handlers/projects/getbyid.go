@@ -11,15 +11,15 @@ import (
 func GetById(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "projectId"))
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	p, err := projectsvc.GetById(id)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
-	helpers.WriteJSON(w, p)
+	helpers.WriteJSON(w, r, p)
 }

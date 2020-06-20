@@ -11,15 +11,15 @@ import (
 func GetList(w http.ResponseWriter, r *http.Request) {
 	taskId, err := strconv.Atoi(chi.URLParam(r, "taskId"))
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	t, err := commentsvc.GetListByTaskId(taskId)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
-	helpers.WriteJSON(w, t)
+	helpers.WriteJSON(w, r, t)
 }

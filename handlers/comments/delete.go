@@ -11,13 +11,13 @@ import (
 func Delete(w http.ResponseWriter, r *http.Request) {
 	commentId, err := strconv.Atoi(chi.URLParam(r, "commentId"))
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 	c, err := commentsvc.Delete(commentId)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
-	helpers.WriteJSON(w, c)
+	helpers.WriteJSON(w, r, c)
 }

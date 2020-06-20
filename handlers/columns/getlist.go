@@ -11,15 +11,15 @@ import (
 func GetList(w http.ResponseWriter, r *http.Request) {
 	projectId, err := strconv.Atoi(chi.URLParam(r, "projectId"))
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	c, err := columnsvc.GetListByProjectId(projectId)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
-	helpers.WriteJSON(w, c)
+	helpers.WriteJSON(w, r, c)
 }

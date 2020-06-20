@@ -13,22 +13,22 @@ import (
 func Update(w http.ResponseWriter, r *http.Request) {
 	commentId, err := strconv.Atoi(chi.URLParam(r, "commentId"))
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	cb := &models.CommentBase{}
 	err = json.NewDecoder(r.Body).Decode(cb)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	c, err := commentsvc.Update(commentId, cb)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
-	helpers.WriteJSON(w, c)
+	helpers.WriteJSON(w, r, c)
 }

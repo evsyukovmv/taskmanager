@@ -13,23 +13,23 @@ import (
 func Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "projectId"))
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	pb := &models.ProjectBase{}
 	err = json.NewDecoder(r.Body).Decode(pb)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
 	p, err := projectsvc.Update(id, pb)
 	if err != nil {
-		helpers.WriteError(w, err)
+		helpers.WriteError(w, r, err)
 		return
 	}
 
-	helpers.WriteJSON(w, p)
+	helpers.WriteJSON(w, r, p)
 }
 

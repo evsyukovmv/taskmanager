@@ -13,6 +13,7 @@ import (
 
 func NewRouter() http.Handler {
 	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
 	r.Use(appMiddleware.Logger)
 	r.Use(middleware.Recoverer)
 
