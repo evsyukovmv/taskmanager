@@ -10,7 +10,7 @@ type PostgresTasksStorage struct {}
 func (c *PostgresTasksStorage) GetListByColumnId(columnId int) (*[]models.Task, error) {
 	var tasks []models.Task
 
-	rows, err := postgres.DB().Query("SELECT * FROM tasks WHERE column_id = $1 ORDER BY position ASC", columnId)
+	rows, err := postgres.DB().Query("SELECT * FROM tasks WHERE column_id = $1 ORDER BY position", columnId)
 	if err != nil {
 		return &tasks, err
 	}
@@ -45,13 +45,13 @@ func (c *PostgresTasksStorage) Create(task *models.Task) error {
 	{
 		stmt, err := tx.Prepare(`UPDATE tasks SET position = position + 1 WHERE column_id = $1`)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(task.ColumnId); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -59,13 +59,13 @@ func (c *PostgresTasksStorage) Create(task *models.Task) error {
 	{
 		stmt, err := tx.Prepare(`INSERT INTO tasks (name, description, column_id) VALUES ($1, $2, $3) RETURNING id`)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if err := stmt.QueryRow(task.Name, task.Description, task.ColumnId).Scan(&task.Id); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -83,13 +83,13 @@ func (c *PostgresTasksStorage) Move(task *models.Task, newPosition int) error {
 		querySetToNull := `UPDATE tasks SET position = NULL WHERE id = $1`
 		stmt, err := tx.Prepare(querySetToNull)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(task.Id); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -98,13 +98,13 @@ func (c *PostgresTasksStorage) Move(task *models.Task, newPosition int) error {
 		queryDecrement := `UPDATE tasks SET position = position - 1 WHERE column_id = $1 AND position > $2`
 		stmt, err := tx.Prepare(queryDecrement)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(task.ColumnId, task.Position); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -113,13 +113,13 @@ func (c *PostgresTasksStorage) Move(task *models.Task, newPosition int) error {
 		queryIncrement := `UPDATE tasks SET position = position + 1 WHERE column_id = $1 AND position >= $2`
 		stmt, err := tx.Prepare(queryIncrement)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(task.ColumnId, newPosition); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -128,13 +128,13 @@ func (c *PostgresTasksStorage) Move(task *models.Task, newPosition int) error {
 		queryUpdatePosition := `UPDATE tasks SET position = $2 WHERE id = $1`
 		stmt, err := tx.Prepare(queryUpdatePosition)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(task.Id, newPosition); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -160,13 +160,13 @@ func (c *PostgresTasksStorage) Shift(task *models.Task, columnId int) error {
 		queryMaxLeftPosition := `SELECT coalesce(max(position), -1) FROM tasks WHERE column_id = $1`
 		stmt, err := tx.Prepare(queryMaxLeftPosition)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if err := stmt.QueryRow(columnId).Scan(&maxPosition); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -175,13 +175,13 @@ func (c *PostgresTasksStorage) Shift(task *models.Task, columnId int) error {
 		sqlMove := `UPDATE tasks SET column_id = $2, position = position + $3 WHERE id = $1`
 		stmt, err := tx.Prepare(sqlMove)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(task.Id, columnId, maxPosition + 1); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -198,5 +198,10 @@ func (c *PostgresTasksStorage) Update(task *models.Task) error {
 
 func (c *PostgresTasksStorage) Delete(task *models.Task) error {
 	_, err := postgres.DB().Exec(`DELETE FROM tasks WHERE id = $1`, task.Id)
+	return err
+}
+
+func (c *PostgresTasksStorage) Clear() error {
+	_ , err := postgres.DB().Exec("TRUNCATE tasks RESTART IDENTITY CASCADE;")
 	return err
 }

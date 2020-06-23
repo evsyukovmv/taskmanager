@@ -8,4 +8,5 @@ type ProjectStorage interface {
 	Create(project *models.Project) error
 	Update(project *models.Project) error
 	Delete(project *models.Project) error
+	Clear() error
 }

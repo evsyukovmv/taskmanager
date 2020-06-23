@@ -2,8 +2,8 @@ package tasksvc
 
 import (
 	"fmt"
-	"github.com/evsyukovmv/taskmanager/services/columnsvc"
 	"github.com/evsyukovmv/taskmanager/models"
+	"github.com/evsyukovmv/taskmanager/services/columnsvc"
 	"github.com/go-playground/validator/v10"
 	"sync"
 )
@@ -104,4 +104,8 @@ func Update(taskId int, tb *models.TaskBase) (*models.Task, error) {
 
 	err = singleton.storage.Update(t)
 	return t, err
+}
+
+func Clear() error {
+	return singleton.storage.Clear()
 }

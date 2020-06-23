@@ -10,4 +10,5 @@ type TaskStorage interface {
 	Shift(task *models.Task, columnId int) error
 	Update(task *models.Task) error
 	Delete(task *models.Task) error
+	Clear() error
 }

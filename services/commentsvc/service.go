@@ -67,3 +67,7 @@ func Update(taskId int, tb *models.CommentBase) (*models.Comment, error) {
 	err = singleton.storage.Update(t)
 	return t, err
 }
+
+func Clear() error {
+	return singleton.storage.Clear()
+}

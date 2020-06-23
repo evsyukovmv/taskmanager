@@ -10,7 +10,9 @@ func WriteError(w http.ResponseWriter, r *http.Request, err error) {
 	logger.ErrorWithContext(r.Context(), err.Error())
 
 	w.WriteHeader(http.StatusBadRequest)
-	w.Write([]byte(`{ error: "` + err.Error() + `" }`))
+	if _, err := w.Write([]byte(`{ error: "` + err.Error() + `" }`)); err != nil {
+		logger.ErrorWithContext(r.Context(), err.Error())
+	}
 }
 
 func WriteJSON(w http.ResponseWriter, r *http.Request, data interface{}) {
@@ -20,6 +22,10 @@ func WriteJSON(w http.ResponseWriter, r *http.Request, data interface{}) {
 		return
 	}
 
+	if _, err := w.Write(body); err != nil {
+		WriteError(w, r, err)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-	w.Write(body)
 }

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/evsyukovmv/taskmanager/handlers"
 	"github.com/evsyukovmv/taskmanager/models"
-	"github.com/evsyukovmv/taskmanager/postgres"
 	"github.com/evsyukovmv/taskmanager/services/columnsvc"
+	"github.com/evsyukovmv/taskmanager/services/commentsvc"
 	"github.com/evsyukovmv/taskmanager/services/projectsvc"
 	"github.com/evsyukovmv/taskmanager/services/tasksvc"
 	"io/ioutil"
@@ -33,11 +33,11 @@ func setupServer() *httptest.Server {
 	return httptest.NewServer(handlers.NewRouter())
 }
 
-func clearDBTables() {
-	postgres.DB().Exec("TRUNCATE comments RESTART IDENTITY CASCADE;")
-	postgres.DB().Exec("TRUNCATE tasks RESTART IDENTITY CASCADE;")
-	postgres.DB().Exec("TRUNCATE columns RESTART IDENTITY CASCADE;")
-	postgres.DB().Exec("TRUNCATE projects RESTART IDENTITY CASCADE;")
+func clearData() {
+	_ = commentsvc.Clear()
+	_ = tasksvc.Clear()
+	_ = columnsvc.Clear()
+	_ = projectsvc.Clear()
 }
 
 func verifyResponse(t *testing.T, server *httptest.Server, trr testRequestResponse) error {
@@ -148,7 +148,7 @@ var projectsTestData = [...]testRequestResponse{
 func TestProjects(t *testing.T) {
 	server := setupServer()
 	defer server.Close()
-	defer clearDBTables()
+	defer clearData()
 
 	for _, testData := range projectsTestData {
 		if err := verifyResponse(t, server, testData); err != nil {
@@ -223,7 +223,7 @@ var columnsTestData = [...]testRequestResponse{
 func TestColumns(t *testing.T) {
 	server := setupServer()
 	defer server.Close()
-	defer clearDBTables()
+	defer clearData()
 
 	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	err := projectsvc.Create(project)
@@ -337,7 +337,7 @@ var tasksTestData = [...]testRequestResponse{
 func TestTasks(t *testing.T) {
 	server := setupServer()
 	defer server.Close()
-	defer clearDBTables()
+	defer clearData()
 
 	project1 := &models.Project{ProjectBase: models.ProjectBase{Name: "TestProject"}}
 	if err := projectsvc.Create(project1); err != nil {
@@ -430,7 +430,7 @@ var commentsTestData = [...]testRequestResponse{
 func TestComments(t *testing.T) {
 	server := setupServer()
 	defer server.Close()
-	defer clearDBTables()
+	defer clearData()
 
 	project := &models.Project{ProjectBase: models.ProjectBase{Name: "TestProject"}}
 	if err := projectsvc.Create(project); err != nil {

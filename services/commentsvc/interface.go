@@ -8,4 +8,5 @@ type CommentStorage interface {
 	Create(comment *models.Comment) error
 	Update(comment *models.Comment) error
 	Delete(comment *models.Comment) error
+	Clear() error
 }

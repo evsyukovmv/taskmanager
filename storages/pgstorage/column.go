@@ -46,13 +46,13 @@ func (c *PostgresColumnsStorage) Create(column *models.Column) error {
 	{
 		stmt, err := tx.Prepare(`UPDATE columns SET position = position + 1 WHERE project_id = $1`)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(column.ProjectId); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -60,13 +60,13 @@ func (c *PostgresColumnsStorage) Create(column *models.Column) error {
 	{
 		stmt, err := tx.Prepare(`INSERT INTO columns (name, project_id) VALUES ($1, $2) RETURNING id`)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if err := stmt.QueryRow(column.Name, column.ProjectId).Scan(&column.Id); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -84,13 +84,13 @@ func (c *PostgresColumnsStorage) Move(column *models.Column, newPosition int) er
 		querySetToNull := `UPDATE columns SET position = NULL WHERE id = $1`
 		stmt, err := tx.Prepare(querySetToNull)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(column.Id); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -99,13 +99,13 @@ func (c *PostgresColumnsStorage) Move(column *models.Column, newPosition int) er
 		queryDecrement := `UPDATE columns SET position = position - 1 WHERE project_id = $1 AND position > $2`
 		stmt, err := tx.Prepare(queryDecrement)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(column.ProjectId, column.Position); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -114,13 +114,13 @@ func (c *PostgresColumnsStorage) Move(column *models.Column, newPosition int) er
 		queryIncrement := `UPDATE columns SET position = position + 1 WHERE project_id = $1 AND position >= $2`
 		stmt, err := tx.Prepare(queryIncrement)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(column.ProjectId, newPosition); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -129,13 +129,13 @@ func (c *PostgresColumnsStorage) Move(column *models.Column, newPosition int) er
 		queryUpdatePosition := `UPDATE columns SET position = $2 WHERE id = $1`
 		stmt, err := tx.Prepare(queryUpdatePosition)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(column.Id, newPosition); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -168,13 +168,13 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 		queryLeftColumn := `SELECT id FROM columns WHERE project_id = $1 AND position < $2 ORDER BY position ASC LIMIT 1`
 		stmt, err := tx.Prepare(queryLeftColumn)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if err := stmt.QueryRow(column.ProjectId, column.Position).Scan(&leftColumnId); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -183,13 +183,13 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 		queryMaxLeftPosition := `SELECT coalesce(max(position), -1) FROM tasks WHERE column_id = $1`
 		stmt, err := tx.Prepare(queryMaxLeftPosition)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if err := stmt.QueryRow(leftColumnId).Scan(&maxLeftPosition); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -198,13 +198,13 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 		sqlMove := `UPDATE tasks SET column_id = $1, position = position + $3 WHERE column_id = $2`
 		stmt, err := tx.Prepare(sqlMove)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(leftColumnId, column.Id, maxLeftPosition + 1); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -213,13 +213,13 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 		sqlDelete := `DELETE FROM columns WHERE id = $1`
 		stmt, err := tx.Prepare(sqlDelete)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec(column.Id); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -242,4 +242,9 @@ func (c *PostgresColumnsStorage) InSameProject(columnIds ...int) (bool, error) {
 	}
 
 	return count == 1, nil
+}
+
+func (c *PostgresColumnsStorage) Clear() error {
+	_ , err := postgres.DB().Exec("TRUNCATE columns RESTART IDENTITY CASCADE;")
+	return err
 }

@@ -89,3 +89,7 @@ func Update(columnId int, cb *models.ColumnBase) (*models.Column, error) {
 func IsSameProject(columnsIds ...int) (bool, error) {
 	return singleton.storage.InSameProject(columnsIds...)
 }
+
+func Clear() error {
+	return singleton.storage.Clear()
+}

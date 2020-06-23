@@ -44,13 +44,13 @@ func (p *PostgresProjectsStorage) Create(project *models.Project) error {
 	{
 		stmt, err := tx.Prepare(`INSERT INTO projects (name, description) VALUES ($1, $2) RETURNING id`)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if err := stmt.QueryRow(project.Name, project.Description).Scan(&project.Id); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -58,13 +58,13 @@ func (p *PostgresProjectsStorage) Create(project *models.Project) error {
 	{
 		stmt, err := tx.Prepare(`INSERT INTO columns (name, project_id) VALUES ($1, $2) RETURNING id`)
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
 		if _, err := stmt.Exec("default", project.Id); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return err
 		}
 	}
@@ -81,5 +81,10 @@ func (p *PostgresProjectsStorage) Update(project *models.Project) error {
 func (p *PostgresProjectsStorage) Delete(project *models.Project) error {
 	sqlDelete := `DELETE FROM projects WHERE id = $1;`
 	_, err := postgres.DB().Exec(sqlDelete, project.Id)
+	return err
+}
+
+func (p *PostgresProjectsStorage) Clear() error {
+	_ , err := postgres.DB().Exec("TRUNCATE projects RESTART IDENTITY CASCADE;")
 	return err
 }

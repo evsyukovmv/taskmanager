@@ -71,3 +71,7 @@ func Update(projectId int, pb *models.ProjectBase) (*models.Project, error) {
 	err = singleton.storage.Update(p)
 	return p, err
 }
+
+func Clear() error {
+	return singleton.storage.Clear()
+}

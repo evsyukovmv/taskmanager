@@ -10,4 +10,5 @@ type ColumnStorage interface {
 	Update(column *models.Column) error
 	Delete(column *models.Column) error
 	InSameProject(columnIds ...int) (bool, error)
+	Clear() error
 }

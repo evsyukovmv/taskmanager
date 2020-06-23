@@ -51,3 +51,8 @@ func (c *PostgresCommentsStorage) Delete(comment *models.Comment) error {
 	_, err := postgres.DB().Exec(`DELETE FROM comments WHERE id = $1`, comment.Id)
 	return err
 }
+
+func (c *PostgresCommentsStorage) Clear() error {
+	_ , err := postgres.DB().Exec("TRUNCATE comments RESTART IDENTITY CASCADE;")
+	return err
+}
