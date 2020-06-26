@@ -18,7 +18,6 @@ jobs:
           name: Install migrate tool
           command: |
             curl -L https://github.com/golang-migrate/migrate/releases/download/v4.11.0/migrate.linux-amd64.tar.gz | tar xvz
-            ls -la
       - run:
           name: Waiting for Postgres to be ready
           command: |
@@ -32,13 +31,13 @@ jobs:
       - run:
           name: Run migrations
           environment:
-            DB_URL: "postgres://circleci-demo-go@localhost:5432/circle_test?sslmode=disable"
+            DATABASE_URL: "postgres://circleci-demo-go@localhost:5432/circle_test?sslmode=disable"
           command: |
-            ./migrate.linux-amd64 -path db/migrations -database $DB_URL up
+            ./migrate.linux-amd64 -path db/migrations -database $DATABASE_URL up
       - run:
           name: Run unit tests
           environment:
-            DB_URL: "postgres://circleci-demo-go@localhost:5432/circle_test?sslmode=disable"
+            DATABASE_URL: "postgres://circleci-demo-go@localhost:5432/circle_test?sslmode=disable"
             PORT: "8080"
           command: |
             go test -v ./...

@@ -29,7 +29,7 @@ func configureLogger() {
 }
 
 func configurePostgres() {
-	err := postgres.Configure(os.Getenv("DB_URL"))
+	err := postgres.Configure(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("Postgres failed: %s", err.Error())
 	}
