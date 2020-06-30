@@ -2,7 +2,7 @@ package tasks
 
 import (
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
-	"github.com/evsyukovmv/taskmanager/services/tasksvc"
+	"github.com/evsyukovmv/taskmanager/services"
 	"github.com/go-chi/chi"
 	"net/http"
 	"strconv"
@@ -15,7 +15,7 @@ func GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, err := tasksvc.GetById(taskId)
+	c, err := services.ForTask().GetById(taskId)
 	if err != nil {
 		helpers.WriteError(w, r, err)
 		return

@@ -1,4 +1,4 @@
-package commentsvc
+package services
 
 import "github.com/evsyukovmv/taskmanager/models"
 

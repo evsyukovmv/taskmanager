@@ -2,7 +2,7 @@ package comments
 
 import (
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
-	"github.com/evsyukovmv/taskmanager/services/commentsvc"
+	"github.com/evsyukovmv/taskmanager/services"
 	"github.com/go-chi/chi"
 	"net/http"
 	"strconv"
@@ -14,7 +14,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		helpers.WriteError(w, r, err)
 		return
 	}
-	c, err := commentsvc.Delete(commentId)
+	c, err := services.ForComment().Delete(commentId)
 	if err != nil {
 		helpers.WriteError(w, r, err)
 		return

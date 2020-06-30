@@ -1,4 +1,4 @@
-package columnsvc
+package services
 
 import "github.com/evsyukovmv/taskmanager/models"
 
@@ -10,5 +10,6 @@ type ColumnStorage interface {
 	Update(column *models.Column) error
 	Delete(column *models.Column) error
 	InSameProject(columnIds ...int) (bool, error)
+	CountInProject(projectId int) (int, error)
 	Clear() error
 }

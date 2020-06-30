@@ -201,6 +201,13 @@ func (c *PostgresTasksStorage) Delete(task *models.Task) error {
 	return err
 }
 
+func (c *PostgresTasksStorage) CountInColumn(columnId int) (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM tasks WHERE column_id = $1`
+	err := postgres.DB().QueryRow(query, columnId).Scan(&count)
+	return count, err
+}
+
 func (c *PostgresTasksStorage) Clear() error {
 	_ , err := postgres.DB().Exec("TRUNCATE tasks RESTART IDENTITY CASCADE;")
 	return err

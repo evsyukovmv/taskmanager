@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
 	"github.com/evsyukovmv/taskmanager/models"
-	"github.com/evsyukovmv/taskmanager/services/tasksvc"
+	"github.com/evsyukovmv/taskmanager/services"
 	"github.com/go-chi/chi"
 	"net/http"
 	"strconv"
@@ -24,7 +24,7 @@ func Move(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, err := tasksvc.Move(taskId, tp)
+	c, err := services.ForTask().Move(taskId, tp)
 	if err != nil {
 		helpers.WriteError(w, r, err)
 		return

@@ -2,7 +2,7 @@ package comments
 
 import (
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
-	"github.com/evsyukovmv/taskmanager/services/commentsvc"
+	"github.com/evsyukovmv/taskmanager/services"
 	"github.com/go-chi/chi"
 	"net/http"
 	"strconv"
@@ -15,7 +15,7 @@ func GetList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t, err := commentsvc.GetListByTaskId(taskId)
+	t, err := services.ForComment().GetListByTaskId(taskId)
 	if err != nil {
 		helpers.WriteError(w, r, err)
 		return

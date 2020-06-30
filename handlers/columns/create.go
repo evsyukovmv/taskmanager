@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
 	"github.com/evsyukovmv/taskmanager/models"
-	"github.com/evsyukovmv/taskmanager/services/columnsvc"
+	"github.com/evsyukovmv/taskmanager/services"
 	"github.com/go-chi/chi"
 	"net/http"
 	"strconv"
@@ -25,7 +25,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = columnsvc.Create(c)
+	err = services.ForColumn().Create(c)
 	if err != nil {
 		helpers.WriteError(w, r, err)
 		return

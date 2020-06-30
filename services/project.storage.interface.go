@@ -1,4 +1,4 @@
-package projectsvc
+package services
 
 import "github.com/evsyukovmv/taskmanager/models"
 

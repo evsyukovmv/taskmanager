@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
 	"github.com/evsyukovmv/taskmanager/models"
-	"github.com/evsyukovmv/taskmanager/services/projectsvc"
+	"github.com/evsyukovmv/taskmanager/services"
 	"net/http"
 )
 
@@ -17,7 +17,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = projectsvc.Create(&p)
+	err = services.ForProject().Create(&p)
 	if err != nil {
 		helpers.WriteError(w, r, err)
 		return

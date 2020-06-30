@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
 	"github.com/evsyukovmv/taskmanager/models"
-	"github.com/evsyukovmv/taskmanager/services/columnsvc"
+	"github.com/evsyukovmv/taskmanager/services"
 	"github.com/go-chi/chi"
 	"net/http"
 	"strconv"
@@ -24,7 +24,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, err := columnsvc.Update(columnId, cb)
+	c, err := services.ForColumn().Update(columnId, cb)
 	if err != nil {
 		helpers.WriteError(w, r, err)
 		return

@@ -2,7 +2,7 @@ package columns
 
 import (
 	"github.com/evsyukovmv/taskmanager/handlers/helpers"
-	"github.com/evsyukovmv/taskmanager/services/columnsvc"
+	"github.com/evsyukovmv/taskmanager/services"
 	"github.com/go-chi/chi"
 	"net/http"
 	"strconv"
@@ -15,7 +15,7 @@ func GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, err := columnsvc.GetById(columnId)
+	c, err := services.ForColumn().GetById(columnId)
 	if err != nil {
 		helpers.WriteError(w, r, err)
 		return

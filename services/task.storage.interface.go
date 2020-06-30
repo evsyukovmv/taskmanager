@@ -1,4 +1,4 @@
-package tasksvc
+package services
 
 import "github.com/evsyukovmv/taskmanager/models"
 
@@ -10,5 +10,6 @@ type TaskStorage interface {
 	Shift(task *models.Task, columnId int) error
 	Update(task *models.Task) error
 	Delete(task *models.Task) error
+	CountInColumn(columnId int) (int, error)
 	Clear() error
 }

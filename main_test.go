@@ -5,10 +5,7 @@ import (
 	"fmt"
 	"github.com/evsyukovmv/taskmanager/handlers"
 	"github.com/evsyukovmv/taskmanager/models"
-	"github.com/evsyukovmv/taskmanager/services/columnsvc"
-	"github.com/evsyukovmv/taskmanager/services/commentsvc"
-	"github.com/evsyukovmv/taskmanager/services/projectsvc"
-	"github.com/evsyukovmv/taskmanager/services/tasksvc"
+	"github.com/evsyukovmv/taskmanager/services"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -26,6 +23,7 @@ type testRequestResponse struct {
 	responseSkipFields []string
 }
 
+
 func setupServer() *httptest.Server {
 	configureLogger()
 	configurePostgres()
@@ -34,10 +32,10 @@ func setupServer() *httptest.Server {
 }
 
 func clearData() {
-	_ = commentsvc.Clear()
-	_ = tasksvc.Clear()
-	_ = columnsvc.Clear()
-	_ = projectsvc.Clear()
+	_ = services.ForComment().Clear()
+	_ = services.ForTask().Clear()
+	_ = services.ForColumn().Clear()
+	_ = services.ForProject().Clear()
 }
 
 func verifyResponse(t *testing.T, server *httptest.Server, trr testRequestResponse) error {
@@ -216,7 +214,7 @@ var columnsTestData = [...]testRequestResponse{
 		requestMethod: "DELETE",
 		requestPath:   "/projects/1/columns/1",
 		responseCode:  http.StatusBadRequest,
-		responseData:  `{ error: "deleting the first column is not allowed" }`,
+		responseData:  `{ error: "deleting the last column is not allowed" }`,
 	},
 }
 
@@ -226,7 +224,7 @@ func TestColumns(t *testing.T) {
 	defer clearData()
 
 	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
-	err := projectsvc.Create(project)
+	err := services.ForProject().Create(project)
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -340,19 +338,19 @@ func TestTasks(t *testing.T) {
 	defer clearData()
 
 	project1 := &models.Project{ProjectBase: models.ProjectBase{Name: "TestProject"}}
-	if err := projectsvc.Create(project1); err != nil {
+	if err := services.ForProject().Create(project1); err != nil {
 		t.Fatal(err)
 		return
 	}
 
 	column := &models.Column{ColumnBase: models.ColumnBase{Name: "TestColumn"}, ProjectId: project1.Id}
-	if err := columnsvc.Create(column); err != nil {
+	if err := services.ForColumn().Create(column); err != nil {
 		t.Fatal(err)
 		return
 	}
 
 	project2 := &models.Project{ProjectBase: models.ProjectBase{Name: "TestProject"}}
-	if err := projectsvc.Create(project2); err != nil {
+	if err := services.ForProject().Create(project2); err != nil {
 		t.Fatal(err)
 		return
 	}
@@ -433,13 +431,13 @@ func TestComments(t *testing.T) {
 	defer clearData()
 
 	project := &models.Project{ProjectBase: models.ProjectBase{Name: "TestProject"}}
-	if err := projectsvc.Create(project); err != nil {
+	if err := services.ForProject().Create(project); err != nil {
 		t.Fatal(err)
 		return
 	}
 
 	task := &models.Task{TaskBase: models.TaskBase{Name: "TestTask"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
-	if err := tasksvc.Create(task); err != nil {
+	if err := services.ForTask().Create(task); err != nil {
 		t.Fatal(err)
 		return
 	}
@@ -453,10 +451,7 @@ func TestComments(t *testing.T) {
 }
 
 func TestNotFound(t *testing.T) {
-	configureLogger()
-	configurePostgres()
-
-	server := httptest.NewServer(handlers.NewRouter())
+	server := setupServer()
 	defer server.Close()
 
 	resp, err := http.Get(server.URL + "/not_found")

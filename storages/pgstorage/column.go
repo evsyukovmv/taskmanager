@@ -161,19 +161,27 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 		return err
 	}
 
-	var leftColumnId int
-	var maxLeftPosition int
+	var nearColumnId int
+	var maxNearPosition int
 
 	{
-		queryLeftColumn := `SELECT id FROM columns WHERE project_id = $1 AND position < $2 ORDER BY position ASC LIMIT 1`
-		stmt, err := tx.Prepare(queryLeftColumn)
+		var leftOrRight string
+		if column.Position == 0 {
+			leftOrRight = `>`
+		} else {
+			leftOrRight = `<`
+		}
+
+		queryNearColumn := `SELECT id FROM columns WHERE project_id = $1 AND position ` + leftOrRight + ` $2 ORDER BY position ASC LIMIT 1`
+
+		stmt, err := tx.Prepare(queryNearColumn)
 		if err != nil {
 			_ = tx.Rollback()
 			return err
 		}
 		defer stmt.Close()
 
-		if err := stmt.QueryRow(column.ProjectId, column.Position).Scan(&leftColumnId); err != nil {
+		if err := stmt.QueryRow(column.ProjectId, column.Position).Scan(&nearColumnId); err != nil {
 			_ = tx.Rollback()
 			return err
 		}
@@ -188,7 +196,7 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 		}
 		defer stmt.Close()
 
-		if err := stmt.QueryRow(leftColumnId).Scan(&maxLeftPosition); err != nil {
+		if err := stmt.QueryRow(nearColumnId).Scan(&maxNearPosition); err != nil {
 			_ = tx.Rollback()
 			return err
 		}
@@ -203,7 +211,7 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 		}
 		defer stmt.Close()
 
-		if _, err := stmt.Exec(leftColumnId, column.Id, maxLeftPosition + 1); err != nil {
+		if _, err := stmt.Exec(nearColumnId, column.Id, maxNearPosition + 1); err != nil {
 			_ = tx.Rollback()
 			return err
 		}
@@ -242,6 +250,13 @@ func (c *PostgresColumnsStorage) InSameProject(columnIds ...int) (bool, error) {
 	}
 
 	return count == 1, nil
+}
+
+func (c *PostgresColumnsStorage) CountInProject(projectId int) (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM columns WHERE project_id = $1`
+	err := postgres.DB().QueryRow(query, projectId).Scan(&count)
+	return count, err
 }
 
 func (c *PostgresColumnsStorage) Clear() error {
