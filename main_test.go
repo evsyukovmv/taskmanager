@@ -175,14 +175,14 @@ var columnsTestData = [...]testRequestResponse{
 	{
 		message:       "should return column by id",
 		requestMethod: "GET",
-		requestPath:   "/projects/1/columns/2",
+		requestPath:   "/columns/2",
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":2,"project_id":1,"name":"TestColumn","position":0}`,
 	},
 	{
 		message:       "should update columns name",
 		requestMethod: "PUT",
-		requestPath:   "/projects/1/columns/2",
+		requestPath:   "/columns/2",
 		requestData:   `{ "name": "RenamedColumn" }`,
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":2,"project_id":1,"name":"RenamedColumn","position":0}`,
@@ -190,7 +190,7 @@ var columnsTestData = [...]testRequestResponse{
 	{
 		message:       "should move column position",
 		requestMethod: "PUT",
-		requestPath:   "/projects/1/columns/2/move",
+		requestPath:   "/columns/2/move",
 		requestData:   `{ "position": 1 }`,
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":2,"project_id":1,"name":"RenamedColumn","position":1}`,
@@ -198,7 +198,7 @@ var columnsTestData = [...]testRequestResponse{
 	{
 		message:       "should delete column by id",
 		requestMethod: "DELETE",
-		requestPath:   "/projects/1/columns/2",
+		requestPath:   "/columns/2",
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":2,"project_id":1,"name":"RenamedColumn","position":1}`,
 	},
@@ -212,7 +212,7 @@ var columnsTestData = [...]testRequestResponse{
 	{
 		message:       "should return error when delete first column",
 		requestMethod: "DELETE",
-		requestPath:   "/projects/1/columns/1",
+		requestPath:   "/columns/1",
 		responseCode:  http.StatusBadRequest,
 		responseData:  `{ error: "deleting the last column is not allowed" }`,
 	},
@@ -242,7 +242,7 @@ var tasksTestData = [...]testRequestResponse{
 	{
 		message:       "should create task",
 		requestMethod: "POST",
-		requestPath:   "/projects/1/columns/2/tasks",
+		requestPath:   "/columns/2/tasks",
 		requestData:   `{ "name": "TestTask", "description": "TestTask description" }`,
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":1,"column_id":2,"name":"TestTask","description":"TestTask description","position":0}`,
@@ -250,14 +250,14 @@ var tasksTestData = [...]testRequestResponse{
 	{
 		message:       "should get task by id",
 		requestMethod: "GET",
-		requestPath:   "/projects/1/columns/2/tasks/1",
+		requestPath:   "/tasks/1",
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":1,"column_id":2,"name":"TestTask","description":"TestTask description","position":0}`,
 	},
 	{
 		message:       "should create another task",
 		requestMethod: "POST",
-		requestPath:   "/projects/1/columns/2/tasks",
+		requestPath:   "/columns/2/tasks",
 		requestData:   `{ "name": "TestTask2", "description": "TestTask2 description" }`,
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":2,"column_id":2,"name":"TestTask2","description":"TestTask2 description","position":0}`,
@@ -265,14 +265,14 @@ var tasksTestData = [...]testRequestResponse{
 	{
 		message:       "should get tasks list",
 		requestMethod: "GET",
-		requestPath:   "/projects/1/columns/2/tasks",
+		requestPath:   "/columns/2/tasks",
 		responseCode:  http.StatusOK,
 		responseData:  `[{"id":2,"column_id":2,"name":"TestTask2","description":"TestTask2 description","position":0},{"id":1,"column_id":2,"name":"TestTask","description":"TestTask description","position":1}]`,
 	},
 	{
 		message:       "should update task",
 		requestMethod: "PUT",
-		requestPath:   "/projects/1/columns/2/tasks/1",
+		requestPath:   "/tasks/1",
 		requestData:   `{ "name": "TestTask1", "description": "TestTask1 description" }`,
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":1,"column_id":2,"name":"TestTask1","description":"TestTask1 description","position":1}`,
@@ -280,7 +280,7 @@ var tasksTestData = [...]testRequestResponse{
 	{
 		message:       "should move task",
 		requestMethod: "PUT",
-		requestPath:   "/projects/1/columns/2/tasks/1/move",
+		requestPath:   "/tasks/1/move",
 		requestData:   `{ "position": 0 }`,
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":1,"column_id":2,"name":"TestTask1","description":"TestTask1 description","position":0}`,
@@ -288,7 +288,7 @@ var tasksTestData = [...]testRequestResponse{
 	{
 		message:       "should shift task to another column",
 		requestMethod: "PUT",
-		requestPath:   "/projects/1/columns/2/tasks/2/shift",
+		requestPath:   "/tasks/2/shift",
 		requestData:   `{ "column_id": 1 }`,
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":2,"column_id":1,"name":"TestTask2","description":"TestTask2 description","position":1}`,
@@ -296,7 +296,7 @@ var tasksTestData = [...]testRequestResponse{
 	{
 		message:       "should return error if shift to column in another project",
 		requestMethod: "PUT",
-		requestPath:   "/projects/1/columns/2/tasks/2/shift",
+		requestPath:   "/tasks/2/shift",
 		requestData:   `{ "column_id": 3 }`,
 		responseCode:  http.StatusBadRequest,
 		responseData:  `{ error: "columns must be in the same project" }`,
@@ -304,14 +304,14 @@ var tasksTestData = [...]testRequestResponse{
 	{
 		message:       "should remove task",
 		requestMethod: "DELETE",
-		requestPath:   "/projects/1/columns/1/tasks/2",
+		requestPath:   "/tasks/2",
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":2,"column_id":1,"name":"TestTask2","description":"TestTask2 description","position":1}`,
 	},
 	{
 		message:       "should create task in another column",
 		requestMethod: "POST",
-		requestPath:   "/projects/1/columns/1/tasks",
+		requestPath:   "/columns/1/tasks",
 		requestData:   `{ "name": "TestTaskColumn1" }`,
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":3,"column_id":1,"name":"TestTaskColumn1","description":"","position":0}`,
@@ -319,14 +319,14 @@ var tasksTestData = [...]testRequestResponse{
 	{
 		message:       "should delete right column",
 		requestMethod: "DELETE",
-		requestPath:   "/projects/1/columns/1",
+		requestPath:   "/columns/1",
 		responseCode:  http.StatusOK,
 		responseData:  `{"id":1,"project_id":1,"name":"default","position":1}`,
 	},
 	{
 		message:       "should append tasks from right deleted column to left",
 		requestMethod: "GET",
-		requestPath:   "/projects/1/columns/2/tasks",
+		requestPath:   "/columns/2/tasks",
 		responseCode:  http.StatusOK,
 		responseData:  `[{"id":1,"column_id":2,"name":"TestTask1","description":"TestTask1 description","position":0},{"id":3,"column_id":2,"name":"TestTaskColumn1","description":"","position":1}]`,
 	},
@@ -367,7 +367,7 @@ var commentsTestData = [...]testRequestResponse{
 	{
 		message:            "should create comment",
 		requestMethod:      "POST",
-		requestPath:        "/projects/1/columns/1/tasks/1/comments",
+		requestPath:        "/tasks/1/comments",
 		requestData:        `{ "text": "TestComment1" }`,
 		responseCode:       http.StatusOK,
 		responseData:       `{"id":1,"task_id":1,"text":"TestComment1"}`,
@@ -376,7 +376,7 @@ var commentsTestData = [...]testRequestResponse{
 	{
 		message:            "should get comment by id",
 		requestMethod:      "GET",
-		requestPath:        "/projects/1/columns/1/tasks/1/comments/1",
+		requestPath:        "/tasks/1/comments/1",
 		responseCode:       http.StatusOK,
 		responseData:       `{"id":1,"task_id":1,"text":"TestComment1"}`,
 		responseSkipFields: []string{"created_at"},
@@ -384,7 +384,7 @@ var commentsTestData = [...]testRequestResponse{
 	{
 		message:            "should create another comment",
 		requestMethod:      "POST",
-		requestPath:        "/projects/1/columns/1/tasks/1/comments",
+		requestPath:        "/tasks/1/comments",
 		requestData:        `{ "text": "TestComment2" }`,
 		responseCode:       http.StatusOK,
 		responseData:       `{"id":2,"task_id":1,"text":"TestComment2"}`,
@@ -393,7 +393,7 @@ var commentsTestData = [...]testRequestResponse{
 	{
 		message:            "should get comments list sorted by creation date",
 		requestMethod:      "GET",
-		requestPath:        "/projects/1/columns/1/tasks/1/comments",
+		requestPath:        "/tasks/1/comments",
 		responseCode:       http.StatusOK,
 		responseData:       `[{"id":2,"task_id":1,"text":"TestComment2"},{"id":1,"task_id":1,"text":"TestComment1"}]`,
 		responseSkipFields: []string{"created_at"},
@@ -401,7 +401,7 @@ var commentsTestData = [...]testRequestResponse{
 	{
 		message:            "should update comment",
 		requestMethod:      "PUT",
-		requestPath:        "/projects/1/columns/1/tasks/1/comments/1",
+		requestPath:        "/comments/1",
 		requestData:        `{ "text": "UpdatedComment1" }`,
 		responseCode:       http.StatusOK,
 		responseData:       `{"id":1,"task_id":1,"text":"UpdatedComment1"}`,
@@ -410,7 +410,7 @@ var commentsTestData = [...]testRequestResponse{
 	{
 		message:            "should remove comment",
 		requestMethod:      "DELETE",
-		requestPath:        "/projects/1/columns/1/tasks/1/comments/1",
+		requestPath:        "/comments/1",
 		responseCode:       http.StatusOK,
 		responseData:       `{"id":1,"task_id":1,"text":"UpdatedComment1"}`,
 		responseSkipFields: []string{"created_at"},
@@ -418,7 +418,7 @@ var commentsTestData = [...]testRequestResponse{
 	{
 		message:            "should get comments list without deleted",
 		requestMethod:      "GET",
-		requestPath:        "/projects/1/columns/1/tasks/1/comments",
+		requestPath:        "/tasks/1/comments",
 		responseCode:       http.StatusOK,
 		responseData:       `[{"id":2,"task_id":1,"text":"TestComment2"}]`,
 		responseSkipFields: []string{"created_at"},
