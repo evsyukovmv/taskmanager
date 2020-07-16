@@ -11,13 +11,13 @@ import (
 func GetById(w http.ResponseWriter, r *http.Request) {
 	commentId, err := strconv.Atoi(chi.URLParam(r, "commentId"))
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
 	c, err := services.ForComment().GetById(commentId)
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 

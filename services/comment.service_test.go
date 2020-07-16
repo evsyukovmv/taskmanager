@@ -9,12 +9,12 @@ func TestCommentCreate(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
 
-	task := &models.Task{ TaskBase: models.TaskBase{Name: "Test"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
+	task := &models.Task{TaskBase: models.TaskBase{Name: "Test"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
 	if err := ForTask().Create(task); err != nil {
 		t.Error(err.Error())
 	}
@@ -27,7 +27,7 @@ func TestCommentCreate(t *testing.T) {
 	}
 
 	// Should create if valid
-	err = ForComment().Create(&models.Comment{ TaskId: task.Id, CommentBase: models.CommentBase{ Text: "Test" }})
+	err = ForComment().Create(&models.Comment{TaskId: task.Id, CommentBase: models.CommentBase{Text: "Test"}})
 	if err != nil {
 		t.Error("expected:", nil, "got:", err.Error())
 	}
@@ -37,17 +37,17 @@ func TestCommentDelete(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
 
-	task := &models.Task{ TaskBase: models.TaskBase{Name: "Test"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
+	task := &models.Task{TaskBase: models.TaskBase{Name: "Test"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
 	if err := ForTask().Create(task); err != nil {
 		t.Error(err.Error())
 	}
 
-	comment := &models.Comment{ TaskId: task.Id, CommentBase: models.CommentBase{ Text: "Test" }}
+	comment := &models.Comment{TaskId: task.Id, CommentBase: models.CommentBase{Text: "Test"}}
 	if err := ForComment().Create(comment); err != nil {
 		t.Error(err.Error())
 	}
@@ -70,17 +70,17 @@ func TestCommentGetById(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
 
-	task := &models.Task{ TaskBase: models.TaskBase{Name: "Test"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
+	task := &models.Task{TaskBase: models.TaskBase{Name: "Test"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
 	if err := ForTask().Create(task); err != nil {
 		t.Error(err.Error())
 	}
 
-	comment := &models.Comment{ TaskId: task.Id, CommentBase: models.CommentBase{ Text: "Test" }}
+	comment := &models.Comment{TaskId: task.Id, CommentBase: models.CommentBase{Text: "Test"}}
 	if err := ForComment().Create(comment); err != nil {
 		t.Error(err.Error())
 	}
@@ -107,22 +107,22 @@ func TestCommentGetListByTaskId(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
 
-	task := &models.Task{ TaskBase: models.TaskBase{Name: "Test"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
+	task := &models.Task{TaskBase: models.TaskBase{Name: "Test"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
 	if err := ForTask().Create(task); err != nil {
 		t.Error(err.Error())
 	}
 
-	comment1 := &models.Comment{ TaskId: task.Id, CommentBase: models.CommentBase{ Text: "Test" }}
+	comment1 := &models.Comment{TaskId: task.Id, CommentBase: models.CommentBase{Text: "Test"}}
 	if err := ForComment().Create(comment1); err != nil {
 		t.Error(err.Error())
 	}
 
-	comment2 := &models.Comment{ TaskId: task.Id, CommentBase: models.CommentBase{ Text: "Test" }}
+	comment2 := &models.Comment{TaskId: task.Id, CommentBase: models.CommentBase{Text: "Test"}}
 	if err := ForComment().Create(comment2); err != nil {
 		t.Error(err.Error())
 	}
@@ -141,23 +141,23 @@ func TestCommentUpdate(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
 
-	task := &models.Task{ TaskBase: models.TaskBase{Name: "Test"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
+	task := &models.Task{TaskBase: models.TaskBase{Name: "Test"}, TaskColumn: models.TaskColumn{ColumnId: 1}}
 	if err := ForTask().Create(task); err != nil {
 		t.Error(err.Error())
 	}
 
-	comment := &models.Comment{ TaskId: task.Id, CommentBase: models.CommentBase{ Text: "Test" }}
+	comment := &models.Comment{TaskId: task.Id, CommentBase: models.CommentBase{Text: "Test"}}
 	if err := ForComment().Create(comment); err != nil {
 		t.Error(err.Error())
 	}
 
 	// Should return error if doesn't exist
-	_, err := ForComment().Update(comment.Id + 100, &models.CommentBase{})
+	_, err := ForComment().Update(comment.Id+100, &models.CommentBase{})
 	expectedError := "sql: no rows in result set"
 	if err.Error() != expectedError {
 		t.Error("expected:", expectedError, "got:", err.Error())
@@ -172,7 +172,7 @@ func TestCommentUpdate(t *testing.T) {
 
 	// Should update column
 	expectedText := "Updated"
-	result, err := ForComment().Update(comment.Id, &models.CommentBase{Text: expectedText })
+	result, err := ForComment().Update(comment.Id, &models.CommentBase{Text: expectedText})
 	if err != nil {
 		t.Error("expected:", nil, "got:", err.Error())
 	}

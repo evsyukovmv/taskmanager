@@ -5,7 +5,7 @@ import (
 	"github.com/evsyukovmv/taskmanager/postgres"
 )
 
-type PostgresCommentsStorage struct {}
+type PostgresCommentsStorage struct{}
 
 func (c *PostgresCommentsStorage) GetListByTaskId(taskId int) (*[]models.Comment, error) {
 	var comments []models.Comment
@@ -53,6 +53,6 @@ func (c *PostgresCommentsStorage) Delete(comment *models.Comment) error {
 }
 
 func (c *PostgresCommentsStorage) Clear() error {
-	_ , err := postgres.DB().Exec("TRUNCATE comments RESTART IDENTITY CASCADE;")
+	_, err := postgres.DB().Exec("TRUNCATE comments RESTART IDENTITY CASCADE;")
 	return err
 }

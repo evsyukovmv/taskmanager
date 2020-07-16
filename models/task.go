@@ -1,7 +1,7 @@
 package models
 
 type TaskBase struct {
-	Name string `json:"name" validate:"required,lte=500"`
+	Name        string `json:"name" validate:"required,lte=500"`
 	Description string `json:"description" validate:"lte=5000"`
 }
 

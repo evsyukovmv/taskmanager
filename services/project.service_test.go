@@ -18,7 +18,7 @@ func TestProjectCreate(t *testing.T) {
 	}
 
 	// Should create if project valid
-	err = ForProject().Create(&models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }})
+	err = ForProject().Create(&models.Project{ProjectBase: models.ProjectBase{Name: "Test"}})
 	if err != nil {
 		t.Error("expected:", nil, "got:", err.Error())
 	}
@@ -28,7 +28,7 @@ func TestProjectDelete(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	err := ForProject().Create(project)
 	if err != nil {
 		t.Error(err.Error())
@@ -52,7 +52,7 @@ func TestProjectGetById(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	err := ForProject().Create(project)
 	if err != nil {
 		t.Error(err.Error())
@@ -85,13 +85,13 @@ func TestProjectGetList(t *testing.T) {
 		t.Error("expected:", 0, "got:", len(*result))
 	}
 
-	project1 := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test1" }}
+	project1 := &models.Project{ProjectBase: models.ProjectBase{Name: "Test1"}}
 	err = ForProject().Create(project1)
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	project2 := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test2" }}
+	project2 := &models.Project{ProjectBase: models.ProjectBase{Name: "Test2"}}
 	err = ForProject().Create(project2)
 	if err != nil {
 		t.Error(err.Error())
@@ -108,14 +108,14 @@ func TestProjectUpdate(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	err := ForProject().Create(project)
 	if err != nil {
 		t.Error(err.Error())
 	}
 
 	// Should return error if project doesn't exist
-	_, err = ForProject().Update(project.Id + 1000, &models.ProjectBase{})
+	_, err = ForProject().Update(project.Id+1000, &models.ProjectBase{})
 	expectedError := "sql: no rows in result set"
 	if err.Error() != expectedError {
 		t.Error("expected:", expectedError, "got:", err.Error())
@@ -130,7 +130,7 @@ func TestProjectUpdate(t *testing.T) {
 
 	// Should update project
 	expectedName := "Updated"
-	result, err := ForProject().Update(project.Id, &models.ProjectBase{ Name: expectedName })
+	result, err := ForProject().Update(project.Id, &models.ProjectBase{Name: expectedName})
 	if err != nil {
 		t.Error("expected:", nil, "got:", err.Error())
 	}

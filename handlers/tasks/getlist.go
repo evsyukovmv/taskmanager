@@ -11,13 +11,13 @@ import (
 func GetList(w http.ResponseWriter, r *http.Request) {
 	columnId, err := strconv.Atoi(chi.URLParam(r, "columnId"))
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
 	t, err := services.ForTask().GetListByColumnId(columnId)
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 

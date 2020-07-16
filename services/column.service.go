@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"github.com/evsyukovmv/taskmanager/models"
 	"github.com/go-playground/validator/v10"
@@ -8,7 +9,7 @@ import (
 )
 
 type ColumnService struct {
-	storage  ColumnStorage
+	storage   ColumnStorage
 	validator *validator.Validate
 }
 
@@ -49,8 +50,8 @@ func (s *ColumnService) Delete(columnId int) (*models.Column, error) {
 		return c, err
 	}
 
-	if  count < 2 {
-		return c, fmt.Errorf("deleting the last column is not allowed")
+	if count < 2 {
+		return c, errors.New("deleting the last column is not allowed")
 	}
 	err = s.storage.Delete(c)
 	return c, err
@@ -64,7 +65,7 @@ func (s *ColumnService) GetListByProjectId(projectId int) (*[]models.Column, err
 	return s.storage.GetListByProjectId(projectId)
 }
 
-func (s *ColumnService) Move(columnId int, cp *models.ColumnPosition) (*models.Column, error){
+func (s *ColumnService) Move(columnId int, cp *models.ColumnPosition) (*models.Column, error) {
 	c, err := s.storage.GetById(columnId)
 	if err != nil {
 		return c, err
@@ -79,8 +80,8 @@ func (s *ColumnService) Move(columnId int, cp *models.ColumnPosition) (*models.C
 		return c, err
 	}
 
-	if cp.Position < 0 || cp.Position > count - 1 {
-		return c, fmt.Errorf("position must be more or eq 0 and less than %d", count - 1)
+	if cp.Position < 0 || cp.Position > count-1 {
+		return c, fmt.Errorf("position must be more or eq 0 and less than %d", count-1)
 	}
 
 	err = s.storage.Move(c, cp.Position)

@@ -9,20 +9,20 @@ func TestColumnCreate(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
 
 	// Should return error if model invalid
-	err := ForColumn().Create(&models.Column{ ProjectId: project.Id })
+	err := ForColumn().Create(&models.Column{ProjectId: project.Id})
 	expectedError := "Key: 'Column.ColumnBase.Name' Error:Field validation for 'Name' failed on the 'required' tag"
 	if err.Error() != expectedError {
 		t.Error("expected:", expectedError, "got:", err.Error())
 	}
 
 	// Should create if valid
-	err = ForColumn().Create(&models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{ Name: "Test" }})
+	err = ForColumn().Create(&models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{Name: "Test"}})
 	if err != nil {
 		t.Error("expected:", nil, "got:", err.Error())
 	}
@@ -32,12 +32,12 @@ func TestColumnDelete(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
 
-	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{ Name: "Test" }}
+	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{Name: "Test"}}
 	if err := ForColumn().Create(column); err != nil {
 		t.Error(err.Error())
 	}
@@ -67,12 +67,12 @@ func TestColumnGetById(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
 
-	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{ Name: "Test" }}
+	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{Name: "Test"}}
 	if err := ForColumn().Create(column); err != nil {
 		t.Error(err.Error())
 	}
@@ -99,7 +99,7 @@ func TestColumnGetListByProjectId(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
@@ -113,7 +113,7 @@ func TestColumnGetListByProjectId(t *testing.T) {
 		t.Error("expected:", 1, "got:", len(*result))
 	}
 
-	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{ Name: "Test" }}
+	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{Name: "Test"}}
 	if err := ForColumn().Create(column); err != nil {
 		t.Error(err.Error())
 	}
@@ -132,37 +132,37 @@ func TestColumnMove(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
 
-	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{ Name: "Test" }}
+	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{Name: "Test"}}
 	if err := ForColumn().Create(column); err != nil {
 		t.Error(err.Error())
 	}
 
 	// Should return error if column doesn't exist
-	_, err := ForColumn().Move(column.Id + 100, &models.ColumnPosition{Position:  column.Position + 1 })
+	_, err := ForColumn().Move(column.Id+100, &models.ColumnPosition{Position: column.Position + 1})
 	expectedError := "sql: no rows in result set"
 	if err.Error() != expectedError {
 		t.Error("expected:", expectedError, "got:", err.Error())
 	}
 
 	// Should return error if column position is less or more then allowed
-	_, err = ForColumn().Move(column.Id, &models.ColumnPosition{Position:  column.Position + 1000 })
+	_, err = ForColumn().Move(column.Id, &models.ColumnPosition{Position: column.Position + 1000})
 	expectedError = "position must be more or eq 0 and less than 1"
 	if err.Error() != expectedError {
 		t.Error("expected:", expectedError, "got:", err.Error())
 	}
 
 	// Should move column position
-	result, err := ForColumn().Move(column.Id, &models.ColumnPosition{Position:  column.Position + 1 })
+	result, err := ForColumn().Move(column.Id, &models.ColumnPosition{Position: column.Position + 1})
 	if err != nil {
 		t.Error("expected:", nil, "got:", err)
 	}
-	if result.Position != column.Position + 1 {
-		t.Error("expected:", column.Position + 1, "got:", result.Position)
+	if result.Position != column.Position+1 {
+		t.Error("expected:", column.Position+1, "got:", result.Position)
 	}
 }
 
@@ -170,18 +170,18 @@ func TestColumnUpdate(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
 
-	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{ Name: "Test" }}
+	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{Name: "Test"}}
 	if err := ForColumn().Create(column); err != nil {
 		t.Error(err.Error())
 	}
 
 	// Should return error if column doesn't exist
-	_, err := ForColumn().Update(column.Id + 100, &models.ColumnBase{})
+	_, err := ForColumn().Update(column.Id+100, &models.ColumnBase{})
 	expectedError := "sql: no rows in result set"
 	if err.Error() != expectedError {
 		t.Error("expected:", expectedError, "got:", err.Error())
@@ -196,7 +196,7 @@ func TestColumnUpdate(t *testing.T) {
 
 	// Should update column
 	expectedName := "Updated"
-	result, err := ForColumn().Update(column.Id, &models.ColumnBase{Name: expectedName })
+	result, err := ForColumn().Update(column.Id, &models.ColumnBase{Name: expectedName})
 	if err != nil {
 		t.Error("expected:", nil, "got:", err.Error())
 	}
@@ -209,12 +209,12 @@ func TestColumnIsSameProject(t *testing.T) {
 	setupTests()
 	defer clearTests()
 
-	project := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	project := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(project); err != nil {
 		t.Error(err.Error())
 	}
 
-	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{ Name: "Test" }}
+	column := &models.Column{ProjectId: project.Id, ColumnBase: models.ColumnBase{Name: "Test"}}
 	if err := ForColumn().Create(column); err != nil {
 		t.Error(err.Error())
 	}
@@ -228,12 +228,12 @@ func TestColumnIsSameProject(t *testing.T) {
 		t.Error("expected:", true, "got:", result)
 	}
 
-	anotherProject := &models.Project{ProjectBase: models.ProjectBase{ Name: "Test" }}
+	anotherProject := &models.Project{ProjectBase: models.ProjectBase{Name: "Test"}}
 	if err := ForProject().Create(anotherProject); err != nil {
 		t.Error(err.Error())
 	}
 
-	anotherProjectColumn := &models.Column{ProjectId: anotherProject.Id, ColumnBase: models.ColumnBase{ Name: "Test" }}
+	anotherProjectColumn := &models.Column{ProjectId: anotherProject.Id, ColumnBase: models.ColumnBase{Name: "Test"}}
 	if err := ForColumn().Create(anotherProjectColumn); err != nil {
 		t.Error(err.Error())
 	}

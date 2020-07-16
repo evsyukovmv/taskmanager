@@ -41,7 +41,7 @@ func ErrorWithContext(ctx context.Context, msg string, fields ...zap.Field) {
 		ctxRqId = "undefined"
 	}
 
-	zapFields := make([]zap.Field, 1 + len(fields))
+	zapFields := make([]zap.Field, 1+len(fields))
 	zapFields[0] = zap.String("requestId", ctxRqId)
 	zapFields = append(zapFields, fields...)
 	instance.Error(msg, zapFields...)

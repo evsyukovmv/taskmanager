@@ -19,7 +19,7 @@ func Configure(databaseURL string) error {
 		return err
 	}
 
-	 return db.Ping()
+	return db.Ping()
 }
 
 func DB() *sql.DB {

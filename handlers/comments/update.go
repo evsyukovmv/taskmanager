@@ -13,20 +13,20 @@ import (
 func Update(w http.ResponseWriter, r *http.Request) {
 	commentId, err := strconv.Atoi(chi.URLParam(r, "commentId"))
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
 	cb := &models.CommentBase{}
 	err = json.NewDecoder(r.Body).Decode(cb)
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
 	c, err := services.ForComment().Update(commentId, cb)
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 

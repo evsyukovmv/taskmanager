@@ -5,7 +5,7 @@ import (
 	"github.com/evsyukovmv/taskmanager/postgres"
 )
 
-type PostgresProjectsStorage struct {}
+type PostgresProjectsStorage struct{}
 
 func (p *PostgresProjectsStorage) GetList() (*[]models.Project, error) {
 	var projects []models.Project
@@ -85,6 +85,6 @@ func (p *PostgresProjectsStorage) Delete(project *models.Project) error {
 }
 
 func (p *PostgresProjectsStorage) Clear() error {
-	_ , err := postgres.DB().Exec("TRUNCATE projects RESTART IDENTITY CASCADE;")
+	_, err := postgres.DB().Exec("TRUNCATE projects RESTART IDENTITY CASCADE;")
 	return err
 }

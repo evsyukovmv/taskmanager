@@ -23,7 +23,6 @@ type testRequestResponse struct {
 	responseSkipFields []string
 }
 
-
 func setupServer() *httptest.Server {
 	configureLogger()
 	configurePostgres()

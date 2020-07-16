@@ -9,7 +9,7 @@ import (
 func GetList(w http.ResponseWriter, r *http.Request) {
 	p, err := services.ForProject().GetList()
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 

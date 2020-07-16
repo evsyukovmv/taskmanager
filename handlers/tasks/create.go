@@ -13,21 +13,21 @@ import (
 func Create(w http.ResponseWriter, r *http.Request) {
 	columnId, err := strconv.Atoi(chi.URLParam(r, "columnId"))
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
-	t := &models.Task{TaskColumn: models.TaskColumn{ ColumnId: columnId }}
+	t := &models.Task{TaskColumn: models.TaskColumn{ColumnId: columnId}}
 
 	err = json.NewDecoder(r.Body).Decode(&t.TaskBase)
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
 	err = services.ForTask().Create(t)
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 

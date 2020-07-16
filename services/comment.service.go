@@ -7,7 +7,7 @@ import (
 )
 
 type CommentService struct {
-	storage  CommentStorage
+	storage   CommentStorage
 	validator *validator.Validate
 }
 

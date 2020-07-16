@@ -9,7 +9,7 @@ type ColumnPosition struct {
 }
 
 type Column struct {
-	Id int `json:"id"`
+	Id        int `json:"id"`
 	ProjectId int `json:"project_id" validate:"required"`
 	ColumnBase
 	ColumnPosition

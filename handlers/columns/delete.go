@@ -11,12 +11,12 @@ import (
 func Delete(w http.ResponseWriter, r *http.Request) {
 	columnId, err := strconv.Atoi(chi.URLParam(r, "columnId"))
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 	c, err := services.ForColumn().Delete(columnId)
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 	helpers.WriteJSON(w, r, c)

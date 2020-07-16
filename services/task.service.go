@@ -8,7 +8,7 @@ import (
 )
 
 type TaskService struct {
-	storage  TaskStorage
+	storage   TaskStorage
 	validator *validator.Validate
 }
 
@@ -29,7 +29,7 @@ func (s *TaskService) validate(t *models.Task) error {
 	return s.validator.Struct(t)
 }
 
-func (s *TaskService)  Create(t *models.Task) error {
+func (s *TaskService) Create(t *models.Task) error {
 	err := s.validate(t)
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func (s *TaskService)  Create(t *models.Task) error {
 	return s.storage.Create(t)
 }
 
-func (s *TaskService)  Delete(taskId int) (*models.Task, error) {
+func (s *TaskService) Delete(taskId int) (*models.Task, error) {
 	t, err := s.storage.GetById(taskId)
 	if err != nil {
 		return t, err
@@ -48,15 +48,15 @@ func (s *TaskService)  Delete(taskId int) (*models.Task, error) {
 	return t, err
 }
 
-func (s *TaskService)  GetById(taskId int) (*models.Task, error) {
+func (s *TaskService) GetById(taskId int) (*models.Task, error) {
 	return s.storage.GetById(taskId)
 }
 
-func (s *TaskService)  GetListByColumnId(taskId int) (*[]models.Task, error) {
+func (s *TaskService) GetListByColumnId(taskId int) (*[]models.Task, error) {
 	return s.storage.GetListByColumnId(taskId)
 }
 
-func (s *TaskService)  Move(taskId int, tp *models.TaskPosition) (*models.Task, error) {
+func (s *TaskService) Move(taskId int, tp *models.TaskPosition) (*models.Task, error) {
 	t, err := s.storage.GetById(taskId)
 	if err != nil {
 		return t, err
@@ -71,8 +71,8 @@ func (s *TaskService)  Move(taskId int, tp *models.TaskPosition) (*models.Task, 
 		return t, err
 	}
 
-	if tp.Position < 0 || tp.Position > count - 1 {
-		return t, fmt.Errorf("position must be more or eq 0 and less than %d", count - 1)
+	if tp.Position < 0 || tp.Position > count-1 {
+		return t, fmt.Errorf("position must be more or eq 0 and less than %d", count-1)
 	}
 
 	err = s.storage.Move(t, tp.Position)
@@ -101,7 +101,7 @@ func (s *TaskService) Shift(taskId int, tc *models.TaskColumn) (*models.Task, er
 	return t, err
 }
 
-func (s *TaskService)  Update(taskId int, tb *models.TaskBase) (*models.Task, error) {
+func (s *TaskService) Update(taskId int, tb *models.TaskBase) (*models.Task, error) {
 	t, err := s.storage.GetById(taskId)
 	if err != nil {
 		return t, err
@@ -117,6 +117,6 @@ func (s *TaskService)  Update(taskId int, tb *models.TaskBase) (*models.Task, er
 	return t, err
 }
 
-func (s *TaskService)  Clear() error {
+func (s *TaskService) Clear() error {
 	return s.storage.Clear()
 }

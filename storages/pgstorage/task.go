@@ -5,7 +5,7 @@ import (
 	"github.com/evsyukovmv/taskmanager/postgres"
 )
 
-type PostgresTasksStorage struct {}
+type PostgresTasksStorage struct{}
 
 func (c *PostgresTasksStorage) GetListByColumnId(columnId int) (*[]models.Task, error) {
 	var tasks []models.Task
@@ -180,7 +180,7 @@ func (c *PostgresTasksStorage) Shift(task *models.Task, columnId int) error {
 		}
 		defer stmt.Close()
 
-		if _, err := stmt.Exec(task.Id, columnId, maxPosition + 1); err != nil {
+		if _, err := stmt.Exec(task.Id, columnId, maxPosition+1); err != nil {
 			_ = tx.Rollback()
 			return err
 		}
@@ -209,6 +209,6 @@ func (c *PostgresTasksStorage) CountInColumn(columnId int) (int, error) {
 }
 
 func (c *PostgresTasksStorage) Clear() error {
-	_ , err := postgres.DB().Exec("TRUNCATE tasks RESTART IDENTITY CASCADE;")
+	_, err := postgres.DB().Exec("TRUNCATE tasks RESTART IDENTITY CASCADE;")
 	return err
 }

@@ -7,8 +7,8 @@ type CommentBase struct {
 }
 
 type Comment struct {
-	Id int `json:"id"`
-	TaskId int `json:"task_id"`
+	Id        int       `json:"id"`
+	TaskId    int       `json:"task_id"`
 	CreatedAt time.Time `json:"created_at"`
 	CommentBase
 }

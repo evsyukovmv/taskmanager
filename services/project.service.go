@@ -7,7 +7,7 @@ import (
 )
 
 type ProjectService struct {
-	storage  ProjectStorage
+	storage   ProjectStorage
 	validator *validator.Validate
 }
 
@@ -47,15 +47,15 @@ func (s *ProjectService) Delete(projectId int) (*models.Project, error) {
 	return p, err
 }
 
-func (s *ProjectService)  GetById(projectId int) (*models.Project, error) {
+func (s *ProjectService) GetById(projectId int) (*models.Project, error) {
 	return s.storage.GetById(projectId)
 }
 
-func (s *ProjectService)  GetList() (*[]models.Project, error) {
+func (s *ProjectService) GetList() (*[]models.Project, error) {
 	return s.storage.GetList()
 }
 
-func  (s *ProjectService) Update(projectId int, pb *models.ProjectBase) (*models.Project, error) {
+func (s *ProjectService) Update(projectId int, pb *models.ProjectBase) (*models.Project, error) {
 	p, err := s.storage.GetById(projectId)
 	if err != nil {
 		return p, err

@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-type PostgresColumnsStorage struct {}
+type PostgresColumnsStorage struct{}
 
 func (c *PostgresColumnsStorage) GetListByProjectId(projectId int) (*[]models.Column, error) {
 	var columns []models.Column
@@ -33,7 +33,7 @@ func (c *PostgresColumnsStorage) GetById(id int) (*models.Column, error) {
 	column := &models.Column{Id: id}
 	err := postgres.DB().QueryRow(
 		"SELECT * FROM columns WHERE id = $1", column.Id).Scan(
-			&column.Id, &column.Name, &column.Position, &column.ProjectId)
+		&column.Id, &column.Name, &column.Position, &column.ProjectId)
 	return column, err
 }
 
@@ -211,7 +211,7 @@ func (c *PostgresColumnsStorage) Delete(column *models.Column) error {
 		}
 		defer stmt.Close()
 
-		if _, err := stmt.Exec(nearColumnId, column.Id, maxNearPosition + 1); err != nil {
+		if _, err := stmt.Exec(nearColumnId, column.Id, maxNearPosition+1); err != nil {
 			_ = tx.Rollback()
 			return err
 		}
@@ -244,7 +244,7 @@ func (c *PostgresColumnsStorage) InSameProject(columnIds ...int) (bool, error) {
 		}
 		ids += strconv.Itoa(v)
 	}
-	query := `SELECT COUNT(DISTINCT(project_id)) FROM columns WHERE id IN (` + ids +`)`
+	query := `SELECT COUNT(DISTINCT(project_id)) FROM columns WHERE id IN (` + ids + `)`
 	if err := postgres.DB().QueryRow(query).Scan(&count); err != nil {
 		return false, err
 	}
@@ -260,6 +260,6 @@ func (c *PostgresColumnsStorage) CountInProject(projectId int) (int, error) {
 }
 
 func (c *PostgresColumnsStorage) Clear() error {
-	_ , err := postgres.DB().Exec("TRUNCATE columns RESTART IDENTITY CASCADE;")
+	_, err := postgres.DB().Exec("TRUNCATE columns RESTART IDENTITY CASCADE;")
 	return err
 }

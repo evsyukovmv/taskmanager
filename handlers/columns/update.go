@@ -13,20 +13,20 @@ import (
 func Update(w http.ResponseWriter, r *http.Request) {
 	columnId, err := strconv.Atoi(chi.URLParam(r, "columnId"))
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
 	cb := &models.ColumnBase{}
 	err = json.NewDecoder(r.Body).Decode(cb)
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
 	c, err := services.ForColumn().Update(columnId, cb)
 	if err != nil {
-		helpers.WriteError(w, r, err)
+		helpers.WriteError(w, r, err, http.StatusBadRequest)
 		return
 	}
 

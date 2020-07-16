@@ -12,10 +12,7 @@ func Logger(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 
-		ctxRqId, ok := r.Context().Value(middleware.RequestIDKey).(string)
-		if !ok {
-			ctxRqId = "undefined"
-		}
+		ctxRqId := middleware.GetReqID(r.Context())
 
 		defer func(start time.Time) {
 			logger.Info("Request",
@@ -26,7 +23,6 @@ func Logger(next http.Handler) http.Handler {
 				zap.Duration("latency", time.Since(start)),
 				zap.Int("status", ww.Status()))
 		}(time.Now())
-
 
 		next.ServeHTTP(ww, r)
 	}
