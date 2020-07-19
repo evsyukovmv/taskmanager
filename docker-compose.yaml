@@ -1,0 +1,22 @@
+version: '3'
+volumes:
+  postgres_data: {}
+services:
+  db:
+    image: postgres:9.6.18-alpine
+    environment:
+      POSTGRES_DB: taskmanager
+      POSTGRES_USER: tm
+      POSTGRES_PASSWORD: tmpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgres://tm:tmpass@db:5432/taskmanager?sslmode=disable
+      WAIT_DB_HOST: db
+      PORT: 8080
+    depends_on:
+      - db
+    ports:
+      - 8080:8080

@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS projects(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR (500) NOT NULL,
+    description VARCHAR (1000) NULL
+);

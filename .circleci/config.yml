@@ -1,0 +1,43 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.14
+      - image: circleci/postgres:9.6-alpine
+        environment:
+          POSTGRES_USER: circleci-demo-go
+          POSTGRES_DB: circle_test
+
+    working_directory: /go/src/github.com/evsyukovmv/taskmanager
+    steps:
+      - checkout
+      - run:
+          name: Install migrate tool
+          command: |
+            curl -L https://github.com/golang-migrate/migrate/releases/download/v4.11.0/migrate.linux-amd64.tar.gz | tar xvz
+      - run:
+          name: Waiting for Postgres to be ready
+          command: |
+            for i in `seq 1 10`;
+            do
+              nc -z localhost 5432 && echo Success && exit 0
+              echo -n .
+              sleep 1
+            done
+            echo Failed waiting for Postgres && exit 1
+      - run:
+          name: Run migrations
+          environment:
+            DATABASE_URL: "postgres://circleci-demo-go@localhost:5432/circle_test?sslmode=disable"
+          command: |
+            ./migrate.linux-amd64 -path db/migrations -database $DATABASE_URL up
+      - run:
+          name: Run unit tests
+          environment:
+            DATABASE_URL: "postgres://circleci-demo-go@localhost:5432/circle_test?sslmode=disable"
+            PORT: "8080"
+          command: |
+            go test -p 1 -v ./...
